@@ -15,5 +15,11 @@ app.use('/api/summary', summaryRoute);
 app.use('/api/productos', productosRoute);
 app.use('/api/clientes', clientesRoute); // <--- AÑADIR ESTA LÍNEA
 
+// **ESTA ES LA RUTA QUE FALTA**
+app.get('/', (req, res) => {
+    // Puedes enviar un mensaje simple o un archivo HTML
+    res.send('¡La API está funcionando! Usa las rutas /api/...'); 
+});
+
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
