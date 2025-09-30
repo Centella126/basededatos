@@ -119,126 +119,146 @@
   </div>
 
   <script>
-    // Tabs
-    const tabs = document.querySelectorAll(".tab-btn");
-    const contents = document.querySelectorAll(".tab-content");
+      // ------------------------------------------------------------------
+      // 📢 1. LÓGICA DE URL DINÁMICA y REGISTRO PWA (NUEVO)
+      // ------------------------------------------------------------------
+      const IS_LOCALHOST = window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.168');
+      const BASE_URL = IS_LOCALHOST ? "http://localhost:4000" : window.location.origin;
 
-    tabs.forEach(tab => {
-      tab.addEventListener("click", () => {
-        tabs.forEach(t => t.classList.remove("active"));
-        contents.forEach(c => c.classList.remove("active"));
+      // Registro del Service Worker para el PWA
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          // La ruta '/' es relativa a la raíz del dominio (Railway)
+          navigator.serviceWorker.register('/service-worker.js') 
+            .then(registration => {
+              console.log('ServiceWorker registrado con éxito:', registration);
+            })
+            .catch(error => {
+              console.log('Fallo el registro de ServiceWorker:', error);
+            });
+        });
+      }
+      // ------------------------------------------------------------------
+      
+      // Tabs (CÓDIGO ORIGINAL)
+      const tabs = document.querySelectorAll(".tab-btn");
+      const contents = document.querySelectorAll(".tab-content");
 
-        tab.classList.add("active");
-        document.getElementById(tab.dataset.tab).classList.add("active");
-        lucide.createIcons();
+      tabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+          tabs.forEach(t => t.classList.remove("active"));
+          contents.forEach(c => c.classList.remove("active"));
+
+          tab.classList.add("active");
+          document.getElementById(tab.dataset.tab).classList.add("active");
+          lucide.createIcons();
+        });
       });
-    });
 
-    // Fetch resumen
-    async function fetchSummary() {
-      try {
-        const res = await fetch("http://localhost:4000/api/summary");
-        const data = await res.json();
-        document.getElementById("totalVentas").textContent = "$" + data.totalVentas;
-        document.getElementById("totalAbonos").textContent = "$" + data.totalAbonos;
-        document.getElementById("totalPorCobrar").textContent = "$" + data.totalPorCobrar;
-        document.getElementById("totalGananciaPorDia").textContent = "$" + data.totalGananciaPorDia;
-        document.getElementById("totalInvertidoEnProductos").textContent = "$" + data.totalInvertidoEnProductos;
-        lucide.createIcons();
-      } catch (err) {
-        console.error("Error:", err);
-      }
-    }
-
-    document.getElementById("refresh").addEventListener("click", fetchSummary);
-    fetchSummary();
-
-    // Modal agregar producto
-    const modal = document.getElementById("modalProducto");
-    const openBtn = document.getElementById("openAddProduct");
-    const closeBtn = document.getElementById("closeModal");
-    const form = document.getElementById("formProducto");
-
-    openBtn.addEventListener("click", () => modal.classList.remove("hidden"));
-    closeBtn.addEventListener("click", () => modal.classList.add("hidden"));
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData.entries());
-
-      // Convertir a números los campos que lo necesiten
-      data.precio_compra = parseFloat(data.precio_compra);
-      data.unidades = parseInt(data.unidades, 10);
-
-      try {
-        // 👇 URL CORRECTA: Apuntando a la ruta de agregar
-        const res = await fetch("http://localhost:4000/api/productos/agregar", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
-        });
-
-        const result = await res.json(); // Leer la respuesta del servidor
-
-        if (res.ok) {
-          alert(`✅ ${result.message}`); // Mensaje dinámico del backend
-          form.reset();
-          modal.classList.add("hidden");
-        } else {
-          // Mostrar el error específico que envía el backend
-          alert(`❌ Error: ${result.error}`);
+      // Fetch resumen (CÓDIGO ORIGINAL PERO USANDO BASE_URL)
+      async function fetchSummary() {
+        try {
+          // ✅ CAMBIO: Usar la variable BASE_URL
+          const res = await fetch(`${BASE_URL}/api/summary`); 
+          const data = await res.json();
+          document.getElementById("totalVentas").textContent = "$" + data.totalVentas;
+          document.getElementById("totalAbonos").textContent = "$" + data.totalAbonos;
+          document.getElementById("totalPorCobrar").textContent = "$" + data.totalPorCobrar;
+          document.getElementById("totalGananciaPorDia").textContent = "$" + data.totalGananciaPorDia;
+          document.getElementById("totalInvertidoEnProductos").textContent = "$" + data.totalInvertidoEnProductos;
+          lucide.createIcons();
+        } catch (err) {
+          console.error("Error:", err);
         }
-      } catch (err) {
-        console.error(err);
-        alert("❌ Ocurrió un error de conexión.");
       }
-    });
-    // En la etiqueta <script> al final de index.html
 
-    // ... (código existente para Tabs, fetchSummary, Modal Producto)
+      document.getElementById("refresh").addEventListener("click", fetchSummary);
+      fetchSummary();
 
-    // --- LÓGICA PARA EL MODAL AGREGAR CLIENTE (NUEVO) ---
-    const modalCliente = document.getElementById("modalCliente");
-    const openBtnCliente = document.getElementById("openAddClient");
-    const closeBtnCliente = document.getElementById("closeModalCliente");
-    const formCliente = document.getElementById("formCliente");
+      // Modal agregar producto (CÓDIGO ORIGINAL PERO USANDO BASE_URL)
+      const modal = document.getElementById("modalProducto");
+      const openBtn = document.getElementById("openAddProduct");
+      const closeBtn = document.getElementById("closeModal");
+      const form = document.getElementById("formProducto");
 
-    openBtnCliente.addEventListener("click", () => modalCliente.classList.remove("hidden"));
-    closeBtnCliente.addEventListener("click", () => {
-        modalCliente.classList.add("hidden");
-        formCliente.reset(); // Limpiar el formulario al cancelar
-    });
+      openBtn.addEventListener("click", () => modal.classList.remove("hidden"));
+      closeBtn.addEventListener("click", () => modal.classList.add("hidden"));
 
-    formCliente.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const formData = new FormData(formCliente);
-      const data = Object.fromEntries(formData.entries());
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
 
-      try {
-        // URL CORRECTA: Apuntando a la nueva ruta de clientes
-        const res = await fetch("http://localhost:4000/api/clientes/agregar", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
-        });
+        // Convertir a números los campos que lo necesiten
+        data.precio_compra = parseFloat(data.precio_compra);
+        data.unidades = parseInt(data.unidades, 10);
 
-        const result = await res.json(); // Leer la respuesta del servidor
+        try {
+          // ✅ CAMBIO: Usar la variable BASE_URL
+          const res = await fetch(`${BASE_URL}/api/productos/agregar`, { 
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+          });
 
-        if (res.ok) {
-          alert(`✅ ${result.message}`);
-          formCliente.reset();
+          const result = await res.json(); // Leer la respuesta del servidor
+
+          if (res.ok) {
+            alert(`✅ ${result.message}`); // Mensaje dinámico del backend
+            form.reset();
+            modal.classList.add("hidden");
+          } else {
+            // Mostrar el error específico que envía el backend
+            alert(`❌ Error: ${result.error}`);
+          }
+        } catch (err) {
+          console.error(err);
+          alert("❌ Ocurrió un error de conexión.");
+        }
+      });
+
+      // Modal agregar cliente (TU CÓDIGO AGREGADO ANTERIORMENTE, AJUSTADO PARA BASE_URL)
+      const modalCliente = document.getElementById("modalCliente");
+      const openBtnCliente = document.getElementById("openAddClient");
+      const closeBtnCliente = document.getElementById("closeModalCliente");
+      const formCliente = document.getElementById("formCliente");
+
+      openBtnCliente.addEventListener("click", () => modalCliente.classList.remove("hidden"));
+      closeBtnCliente.addEventListener("click", () => {
           modalCliente.classList.add("hidden");
-        } else {
-          // Mostrar el error específico que envía el backend (e.g., ya existe un cliente)
-          alert(`❌ Error: ${result.error}`);
+          formCliente.reset();
+      });
+
+      formCliente.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(formCliente);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+          // ✅ CAMBIO: Usar la variable BASE_URL
+          const res = await fetch(`${BASE_URL}/api/clientes/agregar`, { 
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+          });
+
+          const result = await res.json(); 
+
+          if (res.ok) {
+            alert(`✅ ${result.message}`);
+            formCliente.reset();
+            modalCliente.classList.add("hidden");
+          } else {
+            alert(`❌ Error: ${result.error}`);
+          }
+        } catch (err) {
+          console.error(err);
+          alert("❌ Ocurrió un error de conexión al servidor.");
         }
-      } catch (err) {
-        console.error(err);
-        alert("❌ Ocurrió un error de conexión al servidor.");
-      }
-    });
-    lucide.createIcons();
+      });
+
+
+      lucide.createIcons();
   </script>
 </body>
 </html>
