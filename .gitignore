@@ -1,0 +1,8 @@
+# Ignorar la carpeta de módulos (dependencias)
+node_modules/
+# Ignorar archivos de configuración sensibles
+server/.env
+# Ignorar logs, archivos temporales, etc.
+npm-debug.log*
+*.log
+.DS_Store
