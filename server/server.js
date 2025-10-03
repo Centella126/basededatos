@@ -31,5 +31,10 @@ app.use('/api/abonos', abonosRoute);
 app.use('/api/ventas', ventasRoute); 
 app.use('/api/reportes', reportesRoute); 
 
+// RUTA DE VERIFICACIÓN (SOLO GET)
+app.get('/', (req, res) => { 
+    res.send('¡La API está funcionando! Usa las rutas /api/...'); 
+});
+
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
