@@ -3,13 +3,13 @@ document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
 
     
-    //const API_BASE_URL = "http://localhost:4000/api";
+    // ...existing code...
     // ------------------------------------------------------------------
-    // MODIFICACIÓN NECESARIA EN TU FRONTEND:
-    const API_BASE_URL = "https://basededatos-production-184c.up.railway.app"; // <-- REEMPLAZA ESTA LÍNEA
+    // URL remota por defecto (ajusta si usas otra deployment)
+    const REMOTE_BASE_URL = "https://basededatos-production-184c.up.railway.app";
 
     const IS_LOCALHOST = window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.168');
-    let BASE_URL = IS_LOCALHOST ? "http://localhost:4000" : API_BASE_URL; // <-- Usa la URL de Railway
+    let BASE_URL = IS_LOCALHOST ? "http://localhost:4000" : REMOTE_BASE_URL; // usa localhost en desarrollo o la URL remota en producción
     
     // 📢 NUEVA LÍNEA CLAVE: Verifica y elimina la barra final para evitar la doble barra (//) en el fetch.
     if (BASE_URL.endsWith('/')) {
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- RESUMEN FINANCIERO ---
     async function fetchSummary() {
         try {
-            const res = await fetch(`${API_BASE_URL}/summary`);
+            const res = await fetch(`${BASE_URL}/api/summary`);
             if (!res.ok) throw new Error('Error al obtener el resumen');
             const data = await res.json();
             document.getElementById("totalVentas").textContent = "$" + (data.totalVentas || 0).toFixed(2);
@@ -71,7 +71,10 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById("totalPorCobrar").textContent = "$" + (data.totalPorCobrar || 0).toFixed(2);
             document.getElementById("totalGananciaPorDia").textContent = "$" + (data.totalGananciaPorDia || 0).toFixed(2);
             document.getElementById("totalInvertidoEnProductos").textContent = "$" + (data.totalInvertidoEnProductos || 0).toFixed(2);
-        } catch (err) { console.error("Error fetching summary:", err); }
+        } catch (err) {
+            console.error("Error fetching summary:", err); 
+            throw new Error("Error al obtener el resumen"); // Lanza un error más claro
+        }
     }
     document.getElementById("refresh").addEventListener("click", fetchSummary);
     fetchSummary();
@@ -96,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function populateProductsDropdown() {
         try {
-            const res = await fetch(`${API_BASE_URL}/productos`);
+            const res = await fetch(`${BASE_URL}/api/productos`);
             if (!res.ok) throw new Error('No se pudo cargar la lista de productos');
             productosData = await res.json();
             selectProducto.innerHTML = '<option value="">-- Selecciona un producto --</option>';
@@ -112,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function populateCategoriesDropdown() {
         try {
-            const res = await fetch(`${API_BASE_URL}/categorias`);
+            const res = await fetch(`${BASE_URL}/api/categorias`);
             if (!res.ok) throw new Error('No se pudo cargar la lista de categorías');
             const categoriasData = await res.json();
             selectCategoria.innerHTML = '<option value="">-- Selecciona una categoría --</option>';
@@ -175,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else { delete data.producto_id; }
         if (data.categoria_id !== 'nueva') { delete data.nombre_categoria; } else { delete data.categoria_id; }
         try {
-            const res = await fetch(`${API_BASE_URL}/productos/agregar`, {
+            const res = await fetch(`${BASE_URL}/api/productos/agregar`, {
                 method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data)
             });
             const result = await res.json();
@@ -208,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData(formCliente);
         const data = Object.fromEntries(formData.entries());
         try {
-            const res = await fetch(`${API_BASE_URL}/clientes/agregar`, {
+            const res = await fetch(`${BASE_URL}/api/clientes/agregar`, {
                 method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data)
             });
             const result = await res.json();
@@ -231,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function populateClientsDropdown(selectElement) {
         try {
-            const res = await fetch(`${API_BASE_URL}/clientes`);
+            const res = await fetch(`${BASE_URL}/api/clientes`);
             if (!res.ok) throw new Error('No se pudo cargar la lista de clientes');
             const clientes = await res.json();
             const currentValue = selectElement.value;
@@ -264,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData(formAbono);
         const data = Object.fromEntries(formData.entries());
         try {
-            const res = await fetch(`${API_BASE_URL}/abonos/agregar`, {
+            const res = await fetch(`${BASE_URL}/api/abonos/agregar`, {
                 method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data)
             });
             const result = await res.json();
@@ -284,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function populateProductsDropdownVenta() {
         try {
-            const res = await fetch(`${API_BASE_URL}/productos`);
+            const res = await fetch(`${BASE_URL}/api/productos`);
             if (!res.ok) throw new Error('No se pudo cargar la lista de productos');
             const productos = await res.json();
             selectProductoVenta.productosData = productos;
@@ -332,7 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData(formVenta);
         const data = Object.fromEntries(formData.entries());
         try {
-            const res = await fetch(`${API_BASE_URL}/ventas/agregar`, {
+            const res = await fetch(`${BASE_URL}/api/ventas/agregar`, {
                 method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data)
             });
             const result = await res.json();
@@ -352,7 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function populateDeleteAbonosDropdown() {
         try {
-            const res = await fetch(`${API_BASE_URL}/abonos`);
+            const res = await fetch(`${BASE_URL}/api/abonos`);
             if (!res.ok) throw new Error("No se pudo cargar la lista de abonos");
             const abonos = await res.json();
             selectDeleteAbono.innerHTML = '<option value="">-- Selecciona un abono --</option>';
@@ -383,7 +386,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!abonoId) return;
         if (!confirm("¿Seguro que deseas eliminar este abono?")) return;
         try {
-            const res = await fetch(`${API_BASE_URL}/abonos/${abonoId}`, { method: "DELETE" });
+            const res = await fetch(`${BASE_URL}/api/abonos/${abonoId}`, { method: "DELETE" });
             const result = await res.json();
             if (!res.ok) throw new Error(result.error);
             alert(`✅ ${result.message}`);
@@ -408,7 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Llenar el select con los productos
         try {
-            const res = await fetch(`${API_BASE_URL}/productos`);
+            const res = await fetch(`${BASE_URL}/api/productos`);
             if (!res.ok) throw new Error('No se pudo cargar la lista de productos');
             const productos = await res.json();
 
@@ -440,7 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!confirm('¿Seguro que deseas eliminar este producto?')) return;
 
         try {
-            const res = await fetch(`${API_BASE_URL}/productos/${productoId}`, { method: 'DELETE' });
+            const res = await fetch(`${BASE_URL}/api/productos/${productoId}`, { method: 'DELETE' });
             const data = await res.json();
             if (res.ok) {
                 alert('Producto eliminado correctamente.');
@@ -466,7 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function populateDeleteVentasDropdown() {
     try {
-        const res = await fetch(`${API_BASE_URL}/ventas`);
+    const res = await fetch(`${BASE_URL}/api/ventas`);
         const ventas = await res.json();
         selectDeleteVenta.innerHTML = '<option value="">-- Selecciona una venta --</option>';
         ventas.forEach(v => {
@@ -500,7 +503,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!confirm('¿Seguro que deseas eliminar esta venta?')) return;
 
     try {
-        const res = await fetch(`${API_BASE_URL}/ventas/${ventaId}`, { method: 'DELETE' });
+            const res = await fetch(`${BASE_URL}/api/ventas/${ventaId}`, { method: 'DELETE' });
         const data = await res.json();
         if (data.success) {
         alert('Venta eliminada correctamente.');
@@ -528,7 +531,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function populateDeleteClientesDropdown() {
         try {
             selectDeleteCliente.innerHTML = '<option value="">-- Cargando clientes... --</option>';
-            const res = await fetch(`${API_BASE_URL}/clientes`);
+            const res = await fetch(`${BASE_URL}/api/clientes`);
             if (!res.ok) throw new Error("No se pudo cargar la lista de clientes");
             const clientes = await res.json();
 
@@ -572,7 +575,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const res = await fetch(`${API_BASE_URL}/clientes/${clienteId}`, { 
+            const res = await fetch(`${BASE_URL}/api/clientes/${clienteId}`, { 
                 method: "DELETE" 
             });
             const data = await res.json();
@@ -660,7 +663,7 @@ document.addEventListener('DOMContentLoaded', () => {
             clienteDetalleInfo.classList.add('hidden');
             try {
                 selectConsultaCliente.innerHTML = '<option value="">-- Cargando clientes... --</option>';
-                const res = await fetch(`${API_BASE_URL}/clientes`);
+                const res = await fetch(`${BASE_URL}/api/clientes`);
                 if (!res.ok) throw new Error('No se pudo cargar la lista de clientes');
                 const clientes = await res.json();
                 
@@ -721,9 +724,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         try {
             const [detallesRes, ventasRes, abonosRes] = await Promise.all([
-                fetch(`${API_BASE_URL}/clientes/${clienteId}/detalles`),
-                fetch(`${API_BASE_URL}/ventas/cliente/${clienteId}`),
-                fetch(`${API_BASE_URL}/abonos/cliente/${clienteId}`)
+                fetch(`${BASE_URL}/api/clientes/${clienteId}/detalles`),
+                fetch(`${BASE_URL}/api/ventas/cliente/${clienteId}`),
+                fetch(`${BASE_URL}/api/abonos/cliente/${clienteId}`)
             ]);
 
             if (!detallesRes.ok) throw new Error('No se pudo obtener la información del cliente.');
@@ -819,8 +822,8 @@ document.addEventListener('DOMContentLoaded', () => {
             
             try {
                 const [productosRes, categoriasRes] = await Promise.all([
-                    fetch(`${API_BASE_URL}/productos`),
-                    fetch(`${API_BASE_URL}/categorias`)
+                    fetch(`${BASE_URL}/api/productos`),
+                    fetch(`${BASE_URL}/api/categorias`)
                 ]);
                 if (!productosRes.ok || !categoriasRes.ok) throw new Error('No se pudo cargar la información inicial');
 
@@ -885,7 +888,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Poblar un selector
     async function poblarSelectorFiltro(selectElement, endpoint, valueKey, textKey) {
         try {
-            const res = await fetch(`${API_BASE_URL}/${endpoint}`);
+            const res = await fetch(`${BASE_URL}/api/${endpoint}`);
             const data = await res.json();
             selectElement.innerHTML = `<option value="">Todos</option>`;
             data.forEach(item => {
@@ -907,7 +910,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tablaConsultaVentasBody.innerHTML = '<tr><td colspan="6">Buscando...</td></tr>';
         
         try {
-            const res = await fetch(`${API_BASE_URL}/ventas/filtrar?${params.toString()}`);
+            const res = await fetch(`${BASE_URL}/api/ventas/filtrar?${params.toString()}`);
             const ventas = await res.json();
 
             tablaConsultaVentasBody.innerHTML = '';
@@ -1002,7 +1005,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById("kpi-stock-critico-lista").innerHTML = '';
 
         try {
-            const res = await fetch(`${API_BASE_URL}/reportes/kpis?mes=${mes}`);
+            const res = await fetch(`${BASE_URL}/api/reportes/kpis?mes=${mes}`);
             if (!res.ok) throw new Error('Error al obtener los reportes');
             const data = await res.json();
 
@@ -1053,7 +1056,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchAndRenderCharts(mes) {
         try {
-            const res = await fetch(`${API_BASE_URL}/reportes/graficas?mes=${mes}`);
+            const res = await fetch(`${BASE_URL}/api/reportes/graficas?mes=${mes}`);
             if (!res.ok) throw new Error('Error al obtener datos para las gráficas');
             const data = await res.json();
 
@@ -1201,7 +1204,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Función principal para buscar y mostrar el análisis
     async function fetchAndRenderAnalisis(mes) {
         try {
-            const res = await fetch(`${API_BASE_URL}/reportes/analisis-rapido?mes=${mes}`);
+            const res = await fetch(`${BASE_URL}/api/reportes/analisis-rapido?mes=${mes}`);
             if (!res.ok) throw new Error('No se pudo cargar el análisis rápido');
             const data = await res.json();
 
@@ -1255,7 +1258,7 @@ document.addEventListener('DOMContentLoaded', () => {
             formModifyCliente.reset(); // Limpiar formulario anterior
 
             try {
-                const res = await fetch(`${API_BASE_URL}/clientes`);
+                const res = await fetch(`${BASE_URL}/api/clientes`);
                 const clientes = await res.json();
                 selectModifyCliente.innerHTML = '<option value="">-- Selecciona un cliente --</option>';
                 clientes.forEach(cliente => {
@@ -1284,7 +1287,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             try {
                 // Pedir los datos completos del cliente seleccionado
-                const res = await fetch(`${API_BASE_URL}/clientes/${clienteId}`);
+                const res = await fetch(`${BASE_URL}/api/clientes/${clienteId}`);
                 const cliente = await res.json();
                 
                 // Llenar los campos del formulario con los datos
@@ -1316,7 +1319,7 @@ document.addEventListener('DOMContentLoaded', () => {
             delete data.cliente_id; // No necesitamos enviar el id en el cuerpo
 
             try {
-                const res = await fetch(`${API_BASE_URL}/clientes/modificar/${clienteId}`, {
+                const res = await fetch(`${BASE_URL}/api/clientes/modificar/${clienteId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
@@ -1364,7 +1367,7 @@ document.addEventListener('DOMContentLoaded', () => {
         formModifyAbono.reset();
 
         try {
-        const res = await fetch(`${API_BASE_URL}/abonos`);
+    const res = await fetch(`${BASE_URL}/api/abonos`);
         if (!res.ok) throw new Error('Error al obtener abonos');
         const abonos = await res.json();
         _abonosCache = abonos; // guardar en cache
@@ -1432,7 +1435,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = Object.fromEntries(formData.entries()); // { fecha_abono: '...', monto_abono: '...' }
 
         try {
-        const res = await fetch(`${API_BASE_URL}/abonos/modificar/${abonoId}`, {
+        const res = await fetch(`${BASE_URL}/api/abonos/modificar/${abonoId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
@@ -1486,7 +1489,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cargar productos desde API
     async function cargarProductosModificar() {
         try {
-        const res = await fetch("http://localhost:4000/api/productos");
+        const res = await fetch(`${BASE_URL}/api/productos`);
         const productos = await res.json();
 
         selectModificarProducto.innerHTML = `<option value="">-- Seleccionar producto --</option>`;
@@ -1505,7 +1508,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cargar categorías desde API
     async function cargarCategoriasModificar() {
         try {
-        const res = await fetch("http://localhost:4000/api/categorias");
+        const res = await fetch(`${BASE_URL}/api/categorias`);
         const categorias = await res.json();
 
         selectCategoriaModificar.innerHTML = `<option value="">-- Seleccionar categoría --</option>`;
@@ -1549,7 +1552,7 @@ document.addEventListener('DOMContentLoaded', () => {
         data.unidades_disponibles = parseInt(data.unidades_disponibles);
 
         try {
-        const res = await fetch(`http://localhost:4000/api/productos/${data.producto_id}`, {
+        const res = await fetch(`${BASE_URL}/api/productos/${data.producto_id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
@@ -1597,7 +1600,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cargar ventas
     async function cargarVentas() {
         try {
-            const res = await fetch("http://localhost:4000/api/ventas");
+            const res = await fetch(`${BASE_URL}/api/ventas`);
             const ventas = await res.json();
 
             selectModificarVenta.innerHTML = `<option value="">-- Seleccionar venta --</option>`;
@@ -1624,7 +1627,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cargar productos
     async function cargarProductos() {
         try {
-            const res = await fetch("http://localhost:4000/api/productos");
+            const res = await fetch(`${BASE_URL}/api/productos`);
             const productos = await res.json();
 
             selectProductoModificarVenta.innerHTML = `<option value="">-- Seleccionar producto --</option>`;
@@ -1642,7 +1645,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cargar clientes
     async function cargarClientes() {
         try {
-            const res = await fetch("http://localhost:4000/api/clientes");
+            const res = await fetch(`${BASE_URL}/api/clientes`);
             const clientes = await res.json();
 
             selectClienteModificarVenta.innerHTML = `<option value="">-- Seleccionar cliente --</option>`;
@@ -1690,7 +1693,7 @@ document.addEventListener('DOMContentLoaded', () => {
         data.precio_unitario = parseFloat(data.precio_unitario);
 
         try {
-            const res = await fetch(`http://localhost:4000/api/ventas/${data.venta_id}`, {
+            const res = await fetch(`${BASE_URL}/api/ventas/${data.venta_id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data),
