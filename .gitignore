@@ -1,3 +1,8 @@
+#node_modules
+#server/node_modules
+#server/.env
+
+
 # Ignorar la carpeta de módulos (dependencias)
 node_modules/
 # Ignorar archivos de configuración sensibles

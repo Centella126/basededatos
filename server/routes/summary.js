@@ -22,8 +22,8 @@ router.get('/', async (req, res) => {
     // 3. Total dinero por cobrar
     const totalPorCobrar = Number((totalVentas - totalAbonos).toFixed(2));
 
-    // 4. Total dinero invertido en productos (sumatoria de precio_compra de productos)
-    const totalInvertidoEnProductos = await scalar('SELECT IFNULL(SUM(precio_compra),0) AS totalInvertido FROM productos');
+    // 4. Total dinero invertido en productos 
+    const totalInvertidoEnProductos = await scalar('SELECT SUM(precio_compra * unidades_disponibles) AS totalInvertido FROM productos');
 
     // 5. Total costo de los productos vendidos (sum of precio_compra * cantidad for sold products)
     const totalCostoVendidos = await scalar(

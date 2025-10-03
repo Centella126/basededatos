@@ -6,22 +6,23 @@
   <title>Dashboard Financiero</title>
   <link rel="stylesheet" href="styles.css" />
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <header>
     <h1><i data-lucide="bar-chart-3"></i> Resumen Financiero</h1>
   </header>
 
-  <!-- Barra de pestañas -->
   <nav class="tabs">
     <button class="tab-btn active" data-tab="resumen">Resumen</button>
     <button class="tab-btn" data-tab="agregar">Agregar</button>
+    <button class="tab-btn" data-tab="modificar">Modificar</button>
     <button class="tab-btn" data-tab="eliminar">Eliminar</button>
     <button class="tab-btn" data-tab="consultas">Consultas</button>
+    <button class="tab-btn" data-tab="reportes">Reportes</button>
   </nav>
 
   <main class="container">
-    <!-- Panel Resumen -->
     <section class="tab-content active" id="resumen">
       <div class="grid">
         <div class="card"><h2>Total Ventas</h2><p class="value" id="totalVentas">--</p><p class="muted">Sumatoria de ventas realizadas</p></div>
@@ -33,60 +34,272 @@
       <button id="refresh"><i data-lucide="refresh-cw"></i> Actualizar</button>
     </section>
 
-    <!-- Panel Agregar -->
     <section class="tab-content" id="agregar">
       <h2>Agregar</h2>
-        <div class="options-grid">
-          <button class="option-btn"><i data-lucide="plus-circle"></i> Agregar Abono</button>
-          <button class="option-btn" id="openAddProduct"><i data-lucide="plus-circle"></i> Agregar Producto</button>
-          <button class="option-btn"><i data-lucide="plus-circle"></i> Agregar Venta</button>
-          <button class="option-btn" id="openAddClient"><i data-lucide="plus-circle"></i> Agregar Cliente</button>
-        </div>
+      <div class="options-grid">
+        <button class="option-btn" id="openAddAbono"><i data-lucide="plus-circle"></i> Agregar Abono</button>
+        <button class="option-btn" id="openAddProduct"><i data-lucide="plus-circle"></i> Agregar Producto</button>
+        <button class="option-btn" id="openAddVenta"><i data-lucide="plus-circle"></i> Agregar Venta</button>
+        <button class="option-btn" id="openAddClient"><i data-lucide="plus-circle"></i> Agregar Cliente</button>
+      </div>
     </section>
 
-    <!-- Panel Eliminar -->
+    <section class="tab-content" id="modificar">
+      <h2>Modificar</h2>
+      <div class="options-grid">
+        <button class="option-btn warning" id="openModifyAbono"><i data-lucide="edit"></i> Modificar Abono</button>
+        <button class="option-btn warning" id="openModifyProducto"><i data-lucide="edit"></i> Modificar Producto</button>
+        <button class="option-btn warning" id="openModifyVenta"><i data-lucide="edit"></i> Modificar Venta</button>
+        <button class="option-btn warning" id="openModifyCliente"><i data-lucide="edit"></i> Modificar Cliente</button>
+      </div>
+    </section>
+
     <section class="tab-content" id="eliminar">
       <h2>Eliminar</h2>
       <div class="options-grid">
-        <button class="option-btn danger"><i data-lucide="trash-2"></i> Eliminar Abono</button>
-        <button class="option-btn danger"><i data-lucide="trash-2"></i> Eliminar Producto</button>
-        <button class="option-btn danger"><i data-lucide="trash-2"></i> Eliminar Venta</button>
-        <button class="option-btn danger"><i data-lucide="trash-2"></i> Eliminar Cliente</button>
+        <button class="option-btn danger" id="openDeleteAbono"><i data-lucide="trash-2"></i> Eliminar Abono</button>
+        <button class="option-btn danger" id="openDeleteProducto"><i data-lucide="trash-2"></i> Eliminar Producto</button>
+        <button class="option-btn danger" id="openDeleteVenta"><i data-lucide="trash-2"></i> Eliminar Venta</button>
+        <button class="option-btn danger" id="openDeleteCliente"><i data-lucide="trash-2"></i> Eliminar Cliente</button>
       </div>
     </section>
 
-    <!-- Panel Consultas -->
     <section class="tab-content" id="consultas">
       <h2>Consultas</h2>
       <div class="options-grid">
-        <button class="option-btn"><i data-lucide="search"></i> Clientes</button>
-        <button class="option-btn"><i data-lucide="search"></i> Productos Disponibles</button>
-        <button class="option-btn"><i data-lucide="search"></i> Historial de Ventas</button>
+        <button class="option-btn" id="btn-open-consulta-clientes"><i data-lucide="search"></i> Clientes</button>
+        <button class="option-btn" id="btn-open-consulta-productos"><i data-lucide="package-search"></i> Productos Disponibles</button>
+        <button class="option-btn" id="btn-open-consulta-ventas"><i data-lucide="search"></i> Historial de Ventas</button>
       </div>
     </section>
+
+    <section class="tab-content" id="reportes">
+      <div class="consulta-header">
+          <h2><i data-lucide="line-chart"></i> Reportes</h2>
+          <div class="reportes-filtros">
+              <label for="reportes-month-filter">Seleccionar Mes:</label>
+              <input type="month" id="reportes-month-filter">
+              <button id="refresh-reportes" class="option-btn"><i data-lucide="refresh-cw"></i> Actualizar</button>
+          </div>
+      </div>
+
+      <div class="grid kpi-grid">
+          <div class="card"><h2>Total Invertido</h2><p class="value" id="kpi-total-invertido">--</p><p class="muted">Capital actual en inventario</p></div>
+          <div class="card"><h2>Ventas Totales</h2><p class="value" id="kpi-total-ventas">--</p><p class="muted">Ingresos brutos históricos</p></div>
+          <div class="card"><h2>Categoría Estrella</h2><p class="value" id="kpi-categoria-estrella">--</p><p class="muted">La más vendida por monto</p></div>
+          <div class="card"><h2>Producto Más Rentable</h2><p class="value" id="kpi-producto-rentable">--</p><p class="muted">Mayor margen de ganancia unitaria</p></div>
+          <div class="card">
+              <h2>Stock Crítico (&le; 5)</h2>
+              <p class="value" id="kpi-stock-critico-count">--</p>
+              <div id="kpi-stock-critico-lista-container">
+                  <ul id="kpi-stock-critico-lista"></ul>
+              </div>
+              <p class="muted">Productos con bajo inventario</p>
+          </div>
+      </div>
+    
+
+      <div class="card">
+        <h2><i data-lucide="activity"></i> Análisis Rápido</h2>
+        <div class="analisis-grid">
+            <div class="analisis-item">
+                <h3><i data-lucide="alert-triangle" class="icon-warning"></i> Categorías con Ventas &lt; Inversión</h3>
+                <ul id="analisis-categorias-riesgo"><li>Cargando...</li></ul>
+            </div>
+            <div class="analisis-item">
+                <h3><i data-lucide="trending-down" class="icon-danger"></i> Productos con Ventas Bajas</h3>
+                <ul id="analisis-productos-bajos"><li>Cargando...</li></ul>
+            </div>
+            <div class="analisis-item">
+                <h3><i data-lucide="star" class="icon-success"></i> Productos Top en Ventas</h3>
+                <ul id="analisis-productos-top"><li>Cargando...</li></ul>
+            </div>
+            <div class="analisis-item">
+                <h3><i data-lucide="users" class="icon-info"></i> Clientes con Mayor Adeudo</h3>
+                <ul id="analisis-clientes-adeudo"><li>Cargando...</li></ul>
+            </div>
+      </div>
+      <div class="card">
+          <div class="charts-controls">
+              <button class="chart-btn active" data-chart="ventasPorCategoriaChart">Ventas por Categoría</button>
+              <button class="chart-btn" data-chart="inversionPorCategoriaChart">Inversión por Categoría</button>
+              <button class="chart-btn" data-chart="ventasVsInversionChart">Ventas vs. Inversión</button>
+          </div>
+          
+          <div class="chart-wrapper active" id="ventasPorCategoriaChart-wrapper">
+              <canvas id="ventasPorCategoriaChart"></canvas>
+          </div>
+          <div class="chart-wrapper" id="inversionPorCategoriaChart-wrapper">
+              <canvas id="inversionPorCategoriaChart"></canvas>
+          </div>
+          <div class="chart-wrapper" id="ventasVsInversionChart-wrapper">
+              <canvas id="ventasVsInversionChart"></canvas>
+          </div>
+      </div>
+
+  </div>
+
+    </section>
+
+    <section class="tab-content" id="consulta-clientes-view">
+      <div class="consulta-header">
+          <h2><i data-lucide="user-check"></i> Consulta de Clientes</h2>
+          <button class="option-btn" id="btn-volver-consultas"><i data-lucide="arrow-left"></i> Volver</button>
+      </div>
+      
+      <div class="card">
+          <label for="selectConsultaCliente">Selecciona un Cliente:</label>
+          <select id="selectConsultaCliente" name="cliente_id"></select>
+      </div>
+
+      <div id="cliente-detalle-info" class="hidden">
+          <div class="card">
+              <h3>Datos Personales</h3>
+              <p><strong>Nombre:</strong> <span id="detalle-nombre">--</span></p>
+              <p><strong>Teléfono:</strong> <span id="detalle-telefono">--</span></p>
+              <p><strong>Domicilio:</strong> <span id="detalle-domicilio">--</span></p>
+          </div>
+          <div class="card grid">
+              <div class="sub-card"><h4>Total Comprado</h4><p class="value" id="detalle-comprado">$0.00</p></div>
+              <div class="sub-card"><h4>Total Abonado</h4><p class="value" id="detalle-abonado">$0.00</p></div>
+              <div class="sub-card saldo-deudor"><h4>Saldo Deudor</h4><p class="value" id="detalle-saldo">$0.00</p></div>
+          </div>
+
+          <div class="card">
+              <div class="historial-grid">
+                  <div>
+                      <h3><i data-lucide="shopping-cart"></i> Historial de Ventas</h3>
+                      <div class="table-container">
+                          <table id="tabla-historial-ventas">
+                              <thead>
+                                  <tr><th>Fecha</th><th>Producto</th><th>Cant.</th><th>P. Unit.</th><th>Subtotal</th></tr>
+                              </thead>
+                              <tbody></tbody>
+                          </table>
+                      </div>
+                  </div>
+                  <div>
+                      <h3><i data-lucide="dollar-sign"></i> Historial de Abonos</h3>
+                      <div class="table-container">
+                          <table id="tabla-historial-abonos">
+                              <thead>
+                                  <tr><th>Fecha</th><th>Monto</th></tr>
+                              </thead>
+                              <tbody></tbody>
+                          </table>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+    </section>
+
+    <section class="tab-content" id="consulta-productos-view">
+      <div class="consulta-header">
+          <h2><i data-lucide="package-search"></i> Consulta de Productos Disponibles</h2>
+          <button class="option-btn" id="btn-volver-consultas-desde-productos"><i data-lucide="arrow-left"></i> Volver</button>
+      </div>
+
+      <div class="card card-filtros">
+          <div class="filtro-item">
+              <label for="filtroCategoria">Filtrar por Categoría:</label>
+              <select id="filtroCategoria"></select>
+          </div>
+      </div>
+
+      <div class="card">
+          <div class="table-container">
+              <table id="tabla-consulta-productos">
+                  <thead>
+                      <tr>
+                          <th>Producto</th>
+                          <th class="sortable" data-sort="categoria">Categoría <i data-lucide="arrow-down-up" class="sort-icon"></i></th>
+                          <th>Disponibles</th>
+                          <th>Precio Compra</th>
+                          <th class="sortable" data-sort="subtotal">Subtotal <i data-lucide="arrow-down-up" class="sort-icon"></i></th>
+                          <th>Código Barras</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      </tbody>
+              </table>
+          </div>
+      </div>
+    </section>
+
+    <section class="tab-content" id="consulta-ventas-view">
+      <div class="consulta-header">
+          <h2><i data-lucide="history"></i> Consulta de Historial de Ventas</h2>
+          <button class="option-btn" id="btn-volver-consultas-desde-ventas"><i data-lucide="arrow-left"></i> Volver</button>
+      </div>
+
+      <div class="card card-filtros">
+          <div class="filtro-item">
+              <label for="filtro-fecha-inicio">Desde:</label>
+              <input type="date" id="filtro-fecha-inicio">
+          </div>
+          <div class="filtro-item">
+              <label for="filtro-fecha-fin">Hasta:</label>
+              <input type="date" id="filtro-fecha-fin">
+          </div>
+          <div class="filtro-item">
+              <label for="filtro-cliente">Cliente:</label>
+              <select id="filtro-cliente"></select>
+          </div>
+          <div class="filtro-item">
+              <label for="filtro-producto">Producto:</label>
+              <select id="filtro-producto"></select>
+          </div>
+      </div>
+
+      <div class="card">
+          <div class="table-container">
+              <table id="tabla-consulta-ventas">
+                  <thead>
+                      <tr>
+                          <th>Fecha</th>
+                          <th>Cliente</th>
+                          <th>Producto</th>
+                          <th>Cant.</th>
+                          <th>P. Unitario</th>
+                          <th>Subtotal</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      </tbody>
+              </table>
+          </div>
+          <div class="table-summary">
+              <strong>Total de Ventas (filtrado):</strong>
+              <span id="total-ventas-filtradas">$0.00</span>
+          </div>
+      </div>
+    </section>
+
   </main>
 
-  <!-- Modal Agregar Producto -->
   <div id="modalProducto" class="modal hidden">
     <div class="modal-content">
       <h2>Agregar Producto</h2>
       <form id="formProducto">
-
+        <label>Producto:</label>
+        <select name="producto_id" id="selectProducto" required></select>
+        <div id="camposNuevoProducto" class="hidden">
+          <label>Nombre del Nuevo Producto:</label>
+          <input type="text" name="nombre_producto" />
+          <label>Categoría:</label>
+          <select name="categoria_id" id="selectCategoria"></select>
+          <div id="campoNuevaCategoria" class="hidden">
+            <label>Nombre de la Nueva Categoría:</label>
+            <input type="text" name="nombre_categoria" />
+          </div>
+        </div>
         <label>Código de Barras (Opcional):</label>
-        <input type="text" name="codigo_barras" placeholder="Escanear o escribir..." />
-
-        <label>Nombre del Producto:</label>
-        <input type="text" name="nombre_producto" required />
-
-        <label>Categoría (Nueva o Existente):</label>
-        <input type="text" name="nombre_categoria" placeholder="Ej: Bebidas, Botanas..." required />
-
+        <input type="text" name="codigo_barras" id="inputCodigoBarras" />
         <label>Precio de Compra:</label>
         <input type="number" name="precio_compra" step="0.01" required />
-
         <label>Unidades Adquiridas:</label>
         <input type="number" name="unidades" required />
-
         <div class="modal-actions">
           <button type="submit" class="option-btn"><i data-lucide="check"></i> Guardar</button>
           <button type="button" id="closeModal" class="option-btn danger"><i data-lucide="x"></i> Cancelar</button>
@@ -95,21 +308,16 @@
     </div>
   </div>
 
-  <!-- Modal Agregar Cliente -->
   <div id="modalCliente" class="modal hidden">
     <div class="modal-content">
       <h2>Agregar Cliente</h2>
       <form id="formCliente">
-
         <label>Nombre del Cliente:</label>
         <input type="text" name="nombre" required />
-
         <label>Teléfono (Opcional):</label>
         <input type="text" name="telefono" placeholder="Ej: 3312345678" />
-
         <label>Domicilio (Opcional):</label>
         <input type="text" name="domicilio" placeholder="Ej: Calle 1 #123, Colonia" />
-
         <div class="modal-actions">
           <button type="submit" class="option-btn"><i data-lucide="check"></i> Guardar</button>
           <button type="button" id="closeModalCliente" class="option-btn danger"><i data-lucide="x"></i> Cancelar</button>
@@ -118,153 +326,230 @@
     </div>
   </div>
 
-  <script>
-      // ------------------------------------------------------------------
-      // MODIFICACIÓN NECESARIA EN TU FRONTEND:
-      const RAILWAY_URL = "https://basededatos-production-184c.up.railway.app"; // <-- REEMPLAZA ESTA LÍNEA
+  <div id="modalAbono" class="modal hidden">
+    <div class="modal-content">
+      <h2>Agregar Abono</h2>
+      <form id="formAbono">
+        <label>Cliente:</label>
+        <select name="cliente_id" id="selectClienteAbono" required></select>
+        <label>Fecha del Abono:</label>
+        <input type="date" name="fecha_abono" required />
+        <label>Monto del Abono:</label>
+        <input type="number" name="monto_abono" step="0.01" placeholder="Ej: 150.00" required />
+        <div class="modal-actions">
+          <button type="submit" class="option-btn"><i data-lucide="check"></i> Guardar Abono</button>
+          <button type="button" id="closeModalAbono" class="option-btn danger"><i data-lucide="x"></i> Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-      const IS_LOCALHOST = window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.168');
-      let BASE_URL = IS_LOCALHOST ? "http://localhost:4000" : RAILWAY_URL; // <-- Usa la URL de Railway
-      
-      // 📢 NUEVA LÍNEA CLAVE: Verifica y elimina la barra final para evitar la doble barra (//) en el fetch.
-      if (BASE_URL.endsWith('/')) {
-          BASE_URL = BASE_URL.slice(0, -1);
-      }
+  <div id="modalVenta" class="modal hidden">
+    <div class="modal-content">
+      <h2>Agregar Venta</h2>
+      <form id="formVenta">
+        <label>Producto:</label>
+        <select name="producto_id" id="selectProductoVenta" required></select>
+        <label>Precio de Venta (Unitario):</label>
+        <input type="number" name="precio_unitario" step="0.01" required />
+        <label>Cantidad a Vender:</label>
+        <input type="number" name="cantidad" required />
+        <label>Cliente:</label>
+        <select name="cliente_id" id="selectClienteVenta" required></select>
+        <label>Fecha de Venta:</label>
+        <input type="date" name="fecha_venta" required />
+        <div class="modal-actions">
+          <button type="submit" class="option-btn"><i data-lucide="check"></i> Registrar Venta</button>
+          <button type="button" id="closeModalVenta" class="option-btn danger"><i data-lucide="x"></i> Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-      // Registro del Service Worker para el PWA
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          // La ruta '/' es relativa a la raíz del dominio (Railway)
-          navigator.serviceWorker.register('/service-worker.js') 
-            .then(registration => {
-              console.log('ServiceWorker registrado con éxito:', registration);
-            })
-            .catch(error => {
-              console.log('Fallo el registro de ServiceWorker:', error);
-            });
-        });
-      }
-      // ------------------------------------------------------------------
-      
-      // Tabs (CÓDIGO ORIGINAL)
-      const tabs = document.querySelectorAll(".tab-btn");
-      const contents = document.querySelectorAll(".tab-content");
+  <div id="modalDeleteAbono" class="modal hidden">
+    <div class="modal-content">
+      <h2>Eliminar Abono</h2>
+      <form id="formDeleteAbono">
+        <label>Selecciona un Abono:</label>
+        <select name="abono_id" id="selectDeleteAbono" required></select>
+        <div class="modal-actions">
+          <button type="submit" class="option-btn danger"><i data-lucide="trash-2"></i> Eliminar</button>
+          <button type="button" id="closeModalDeleteAbono" class="option-btn"><i data-lucide="x"></i> Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-      tabs.forEach(tab => {
-        tab.addEventListener("click", () => {
-          tabs.forEach(t => t.classList.remove("active"));
-          contents.forEach(c => c.classList.remove("active"));
+  <div id="modalDeleteProducto" class="modal hidden">
+    <div class="modal-content">
+      <h2>Eliminar Producto</h2>
+      <form id="formDeleteProducto">
+        <label>Selecciona un Producto:</label>
+        <select name="producto_id" id="selectDeleteProducto" required></select>
+        <div class="modal-actions">
+          <button type="submit" class="option-btn danger">
+            <i data-lucide="trash-2"></i> Eliminar
+          </button>
+          <button type="button" id="closeModalDeleteProducto" class="option-btn">
+            <i data-lucide="x"></i> Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-          tab.classList.add("active");
-          document.getElementById(tab.dataset.tab).classList.add("active");
-          lucide.createIcons();
-        });
-      });
+  <div id="modalDeleteVenta" class="modal hidden">
+    <div class="modal-content">
+      <h2>Eliminar Venta</h2>
+      <form id="formDeleteVenta">
+        <label>Selecciona una Venta:</label>
+        <select name="venta_id" id="selectDeleteVenta" required></select>
+        <div class="modal-actions">
+          <button type="submit" class="option-btn danger"><i data-lucide="trash-2"></i> Eliminar</button>
+          <button type="button" id="closeModalDeleteVenta" class="option-btn"><i data-lucide="x"></i> Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-      // Fetch resumen (CÓDIGO ORIGINAL PERO USANDO BASE_URL)
-      async function fetchSummary() {
-        try {
-          // ✅ CAMBIO: Usar la variable BASE_URL
-          const res = await fetch(`${BASE_URL}/api/summary`); 
-          const data = await res.json();
-          document.getElementById("totalVentas").textContent = "$" + data.totalVentas;
-          document.getElementById("totalAbonos").textContent = "$" + data.totalAbonos;
-          document.getElementById("totalPorCobrar").textContent = "$" + data.totalPorCobrar;
-          document.getElementById("totalGananciaPorDia").textContent = "$" + data.totalGananciaPorDia;
-          document.getElementById("totalInvertidoEnProductos").textContent = "$" + data.totalInvertidoEnProductos;
-          lucide.createIcons();
-        } catch (err) {
-          console.error("Error:", err);
-        }
-      }
+  <div id="modalDeleteCliente" class="modal hidden">
+    <div class="modal-content">
+      <h2>Eliminar Cliente</h2>
+      <form id="formDeleteCliente">
+        <label for="selectDeleteCliente">Selecciona un cliente:</label>
+        <select id="selectDeleteCliente" required>
+          <option value="">-- Cargando clientes --</option>
+        </select>
+        <div class="modal-actions">
+          <button type="submit" class="option-btn danger">
+            <i data-lucide="trash-2"></i> Eliminar
+          </button>
+          <button type="button" id="cancelDeleteCliente" class="option-btn">
+            <i data-lucide="x"></i> Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-      document.getElementById("refresh").addEventListener("click", fetchSummary);
-      fetchSummary();
+  <!-- Modal Modificar cliente -->
+  <div id="modalModificarCliente" class="modal hidden">
+    <div class="modal-content">
+        <h2>Modificar Cliente</h2>
+        <form id="formModificarCliente">
+            <label>Selecciona el cliente a modificar:</label>
+            <select name="cliente_id" id="selectModificarCliente" required></select>
+            
+            <div id="camposModificarCliente" class="hidden">
+                <label>Nombre del Cliente:</label>
+                <input type="text" name="nombre" required />
+                <label>Teléfono:</label>
+                <input type="text" name="telefono" />
+                <label>Domicilio:</label>
+                <input type="text" name="domicilio" />
+            </div>
+            <div class="modal-actions">
+                <button type="submit" class="option-btn warning"><i data-lucide="save"></i> Guardar Cambios</button>
+                <button type="button" class="close-modal option-btn danger"><i data-lucide="x"></i> Cancelar</button>
+            </div>
+        </form>
+    </div>
+  </div>
 
-      // Modal agregar producto (CÓDIGO ORIGINAL PERO USANDO BASE_URL)
-      const modal = document.getElementById("modalProducto");
-      const openBtn = document.getElementById("openAddProduct");
-      const closeBtn = document.getElementById("closeModal");
-      const form = document.getElementById("formProducto");
+  <!-- Modal Modificar abono -->
+  <div id="modalModificarAbono" class="modal hidden">
+    <div class="modal-content">
+        <h2>Modificar Abono</h2>
+        <form id="formModificarAbono">
+            <label>Selecciona el abono a modificar:</label>
+            <select name="abono_id" id="selectModificarAbono" required></select>
+            
+            <div id="camposModificarAbono" class="hidden">
+                <label>Fecha del Abono:</label>
+                <input type="date" name="fecha_abono" required />
+                <label>Monto del Abono:</label>
+                <input type="number" step="0.01" name="monto_abono" required />
+            </div>
 
-      openBtn.addEventListener("click", () => modal.classList.remove("hidden"));
-      closeBtn.addEventListener("click", () => modal.classList.add("hidden"));
+            <div class="modal-actions">
+                <button type="submit" class="option-btn warning">
+                    <i data-lucide="save"></i> Guardar Cambios
+                </button>
+                <button type="button" class="close-modal option-btn danger">
+                    <i data-lucide="x"></i> Cancelar
+                </button>
+            </div>
+        </form>
+    </div>
+  </div>
 
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
+  <!-- Modal Modificar Producto -->
+  <div id="modalModificarProducto" class="modal hidden">
+    <div class="modal-content">
+      <h2>Modificar Producto</h2>
+      <form id="formModificarProducto">
+        <label>Selecciona el producto a modificar:</label>
+        <select name="producto_id" id="selectModificarProducto" required></select>
+        
+        <div id="camposModificarProducto" class="hidden">
+          <label>Nombre del Producto:</label>
+          <input type="text" name="nombre_producto" required />
 
-        // Convertir a números los campos que lo necesiten
-        data.precio_compra = parseFloat(data.precio_compra);
-        data.unidades = parseInt(data.unidades, 10);
+          <label>Código de Barras:</label>
+          <input type="text" name="codigo_barras" />
 
-        try {
-          // ✅ CAMBIO: Usar la variable BASE_URL
-          const res = await fetch(`${BASE_URL}/api/productos/agregar`, { 
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-          });
+          <label>Categoría:</label>
+          <select name="categoria_id" id="selectCategoriaModificar"></select>
 
-          const result = await res.json(); // Leer la respuesta del servidor
+          <label>Precio de Compra:</label>
+          <input type="number" step="0.01" name="precio_compra" required />
 
-          if (res.ok) {
-            alert(`✅ ${result.message}`); // Mensaje dinámico del backend
-            form.reset();
-            modal.classList.add("hidden");
-          } else {
-            // Mostrar el error específico que envía el backend
-            alert(`❌ Error: ${result.error}`);
-          }
-        } catch (err) {
-          console.error(err);
-          alert("❌ Ocurrió un error de conexión.");
-        }
-      });
+          <label>Unidades Disponibles:</label>
+          <input type="number" name="unidades_disponibles" required />
+        </div>
 
-      // Modal agregar cliente (TU CÓDIGO AGREGADO ANTERIORMENTE, AJUSTADO PARA BASE_URL)
-      const modalCliente = document.getElementById("modalCliente");
-      const openBtnCliente = document.getElementById("openAddClient");
-      const closeBtnCliente = document.getElementById("closeModalCliente");
-      const formCliente = document.getElementById("formCliente");
+        <div class="modal-actions">
+          <button type="submit" class="option-btn warning"><i data-lucide="save"></i> Guardar Cambios</button>
+          <button type="button" class="close-modal option-btn danger"><i data-lucide="x"></i> Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-      openBtnCliente.addEventListener("click", () => modalCliente.classList.remove("hidden"));
-      closeBtnCliente.addEventListener("click", () => {
-          modalCliente.classList.add("hidden");
-          formCliente.reset();
-      });
+  <!-- Modal Modificar Venta -->
+  <div id="modalModificarVenta" class="modal hidden">
+    <div class="modal-content">
+      <h2>Modificar Venta</h2>
+      <form id="formModificarVenta">
+        <label>Selecciona la venta a modificar:</label>
+        <select name="venta_id" id="selectModificarVenta" required></select>
 
-      formCliente.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const formData = new FormData(formCliente);
-        const data = Object.fromEntries(formData.entries());
+        <div id="camposModificarVenta" class="hidden">
+          <label>Producto:</label>
+          <select name="producto_id" id="selectProductoModificarVenta" required></select>
 
-        try {
-          // ✅ CAMBIO: Usar la variable BASE_URL
-          const res = await fetch(`${BASE_URL}/api/clientes/agregar`, { 
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-          });
+          <label>Cliente:</label>
+          <select name="cliente_id" id="selectClienteModificarVenta" required></select>
 
-          const result = await res.json(); 
+          <label>Fecha de Venta:</label>
+          <input type="date" name="fecha_venta" required />
 
-          if (res.ok) {
-            alert(`✅ ${result.message}`);
-            formCliente.reset();
-            modalCliente.classList.add("hidden");
-          } else {
-            alert(`❌ Error: ${result.error}`);
-          }
-        } catch (err) {
-          console.error(err);
-          alert("❌ Ocurrió un error de conexión al servidor.");
-        }
-      });
+          <label>Cantidad:</label>
+          <input type="number" name="cantidad" min="1" required />
 
+          <label>Precio Unitario:</label>
+          <input type="number" step="0.01" name="precio_unitario" required />
+        </div>
 
-      lucide.createIcons();
-  </script>
+        <div class="modal-actions">
+          <button type="submit" class="option-btn warning">Guardar Cambios</button>
+          <button type="button" class="close-modal option-btn danger">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  
+  <script src="script.js" defer></script>
 </body>
 </html>
