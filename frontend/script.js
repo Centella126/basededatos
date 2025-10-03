@@ -6,10 +6,10 @@ document.addEventListener('DOMContentLoaded', () => {
     //const API_BASE_URL = "http://localhost:4000/api";
     // ------------------------------------------------------------------
     // MODIFICACIÓN NECESARIA EN TU FRONTEND:
-    const RAILWAY_URL = "https://basededatos-production-184c.up.railway.app"; // <-- REEMPLAZA ESTA LÍNEA
+    const API_BASE_URL = "https://basededatos-production-184c.up.railway.app"; // <-- REEMPLAZA ESTA LÍNEA
 
     const IS_LOCALHOST = window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.168');
-    let BASE_URL = IS_LOCALHOST ? "http://localhost:4000" : RAILWAY_URL; // <-- Usa la URL de Railway
+    let BASE_URL = IS_LOCALHOST ? "http://localhost:4000" : API_BASE_URL; // <-- Usa la URL de Railway
     
     // 📢 NUEVA LÍNEA CLAVE: Verifica y elimina la barra final para evitar la doble barra (//) en el fetch.
     if (BASE_URL.endsWith('/')) {
