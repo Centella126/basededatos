@@ -21,17 +21,54 @@
     <button class="tab-btn" data-tab="consultas">Consultas</button>
     <button class="tab-btn" data-tab="reportes">Reportes</button>
   </nav>
+  <!-- FAB para móvil -->
+  <button id="fab-menu" class="fab-menu" aria-label="Abrir menú de navegación">
+    <i data-lucide="menu"></i>
+  </button>
+  <!-- Overlay para menú móvil -->
+  <div id="mobile-menu-overlay" class="mobile-menu-overlay hidden"></div>
+  <!-- Bottom sheet menú móvil -->
+  <div id="mobile-bottom-sheet" class="mobile-bottom-sheet hidden">
+    <nav class="mobile-nav">
+      <button class="mobile-nav-btn" data-tab="resumen"><i data-lucide="bar-chart-3"></i> Resumen</button>
+      <button class="mobile-nav-btn" data-tab="agregar"><i data-lucide="plus-circle"></i> Agregar</button>
+      <button class="mobile-nav-btn" data-tab="modificar"><i data-lucide="edit"></i> Modificar</button>
+      <button class="mobile-nav-btn" data-tab="eliminar"><i data-lucide="trash-2"></i> Eliminar</button>
+      <button class="mobile-nav-btn" data-tab="consultas"><i data-lucide="search"></i> Consultas</button>
+      <button class="mobile-nav-btn" data-tab="reportes"><i data-lucide="line-chart"></i> Reportes</button>
+    </nav>
+  </div>
 
   <main class="container">
     <section class="tab-content active" id="resumen">
       <div class="grid">
-        <div class="card"><h2>Total Ventas</h2><p class="value" id="totalVentas">--</p><p class="muted">Sumatoria de ventas realizadas</p></div>
-        <div class="card"><h2>Total Abonos</h2><p class="value" id="totalAbonos">--</p><p class="muted">Pagos recibidos de clientes</p></div>
-        <div class="card"><h2>Por Cobrar</h2><p class="value" id="totalPorCobrar">--</p><p class="muted">Ventas - Abonos</p></div>
-        <div class="card"><h2>Ganancia del Día</h2><p class="value" id="totalGananciaPorDia">--</p><p class="muted">Ganancia neta del día actual</p></div>
-        <div class="card"><h2>Invertido en Productos</h2><p class="value" id="totalInvertidoEnProductos">--</p><p class="muted">Capital actual en inventario</p></div>
+        <div class="card"><h2>Total Ventas</h2><p class="value" id="totalVentas"></div>
+        <div class="card"><h2>Total Abonos</h2><p class="value" id="totalAbonos"></div>
+        <div class="card"><h2>Por Cobrar</h2><p class="value" id="totalPorCobrar"></div>
+        <div class="card"><h2>Invertido en Productos</h2><p class="value" id="totalInvertidoEnProductos"></div>
+        
+        <div class="card">
+          <h2>Ganancia</h2>
+          <div class="value-with-action">
+              <p class="value" id="totalGananciaPorDia">$0.00</p>
+              <button id="btnRetirarGanancia" class="option-btn success" title="Retirar Ganancia del Día">
+                  <i data-lucide="download"></i>
+              </button>
+          </div>
+        </div>
+
+        <div class="card card-actions">
+          <button class="option-btn" id="actionAddVenta"><i data-lucide="shopping-cart"></i> Venta</button>
+          <button class="option-btn" id="actionAddAbono"><i data-lucide="dollar-sign"></i> Abono</button>
+        </div>
+          
       </div>
-      <button id="refresh"><i data-lucide="refresh-cw"></i> Actualizar</button>
+
+      <div class="resumen-actions-row">
+        <button id="refresh" class="option-btn" title="Actualizar"><i data-lucide="refresh-cw"></i></button>
+        <div style="flex:1"></div>
+        <button id="openWhatsappModal" class="option-btn whatsapp-btn" title="Enviar Saldos"><i data-lucide="message-circle"></i></button>
+      </div>
     </section>
 
     <section class="tab-content" id="agregar">
@@ -74,70 +111,62 @@
     </section>
 
     <section class="tab-content" id="reportes">
-      <div class="consulta-header">
-          <h2><i data-lucide="line-chart"></i> Reportes</h2>
-          <div class="reportes-filtros">
-              <label for="reportes-month-filter">Seleccionar Mes:</label>
-              <input type="month" id="reportes-month-filter">
-              <button id="refresh-reportes" class="option-btn"><i data-lucide="refresh-cw"></i> Actualizar</button>
-          </div>
+    <div class="consulta-header">
+      <h2><i data-lucide="line-chart"></i> Reportes</h2>
+      <div class="reportes-filtros">
+        <label for="reportes-month-filter">Seleccionar Mes:</label>
+        <input type="month" id="reportes-month-filter">
+        <button id="refresh-reportes" class="option-btn"><i data-lucide="refresh-cw"></i> Actualizar</button>
       </div>
+    </div>
 
-      <div class="grid kpi-grid">
-          <div class="card"><h2>Total Invertido</h2><p class="value" id="kpi-total-invertido">--</p><p class="muted">Capital actual en inventario</p></div>
-          <div class="card"><h2>Ventas Totales</h2><p class="value" id="kpi-total-ventas">--</p><p class="muted">Ingresos brutos históricos</p></div>
-          <div class="card"><h2>Categoría Estrella</h2><p class="value" id="kpi-categoria-estrella">--</p><p class="muted">La más vendida por monto</p></div>
-          <div class="card"><h2>Producto Más Rentable</h2><p class="value" id="kpi-producto-rentable">--</p><p class="muted">Mayor margen de ganancia unitaria</p></div>
-          <div class="card">
-              <h2>Stock Crítico (&le; 5)</h2>
-              <p class="value" id="kpi-stock-critico-count">--</p>
-              <div id="kpi-stock-critico-lista-container">
-                  <ul id="kpi-stock-critico-lista"></ul>
-              </div>
-              <p class="muted">Productos con bajo inventario</p>
-          </div>
-      </div>
-    
+    <div class="grid kpi-grid">
+      <div class="card kpi-full"><h2>Total Invertido</h2><p class="value" id="kpi-total-invertido"></div>
+      <div class="card kpi-full"><h2>Ventas Totales</h2><p class="value" id="kpi-total-ventas"></div>
+      <div class="card kpi-full"><h2>Categoría Estrella</h2><p class="value" id="kpi-categoria-estrella"></div>
+      <div class="card kpi-full"><h2>Producto Más Rentable</h2><p class="value" id="kpi-producto-rentable"></div>
+    </div>
 
-      <div class="card">
-        <h2><i data-lucide="activity"></i> Análisis Rápido</h2>
-        <div class="analisis-grid">
-            <div class="analisis-item">
-                <h3><i data-lucide="alert-triangle" class="icon-warning"></i> Categorías con Ventas &lt; Inversión</h3>
-                <ul id="analisis-categorias-riesgo"><li>Cargando...</li></ul>
-            </div>
-            <div class="analisis-item">
-                <h3><i data-lucide="trending-down" class="icon-danger"></i> Productos con Ventas Bajas</h3>
-                <ul id="analisis-productos-bajos"><li>Cargando...</li></ul>
-            </div>
-            <div class="analisis-item">
-                <h3><i data-lucide="star" class="icon-success"></i> Productos Top en Ventas</h3>
-                <ul id="analisis-productos-top"><li>Cargando...</li></ul>
-            </div>
-            <div class="analisis-item">
-                <h3><i data-lucide="users" class="icon-info"></i> Clientes con Mayor Adeudo</h3>
-                <ul id="analisis-clientes-adeudo"><li>Cargando...</li></ul>
-            </div>
+    <!-- Sección de Análisis Rápido -->
+    <div class="card">
+    <h2><i data-lucide="activity"></i> Análisis Rápido</h2>
+    <div class="analisis-grid">
+      <div class="analisis-item">
+        <h3><i data-lucide="alert-triangle" class="icon-warning"></i> Categorías con Ventas &lt; Inversión</h3>
+        <ul id="analisis-categorias-riesgo"><li>Cargando...</li></ul>
       </div>
-      <div class="card">
-          <div class="charts-controls">
-              <button class="chart-btn active" data-chart="ventasPorCategoriaChart">Ventas por Categoría</button>
-              <button class="chart-btn" data-chart="inversionPorCategoriaChart">Inversión por Categoría</button>
-              <button class="chart-btn" data-chart="ventasVsInversionChart">Ventas vs. Inversión</button>
-          </div>
-          
-          <div class="chart-wrapper active" id="ventasPorCategoriaChart-wrapper">
-              <canvas id="ventasPorCategoriaChart"></canvas>
-          </div>
-          <div class="chart-wrapper" id="inversionPorCategoriaChart-wrapper">
-              <canvas id="inversionPorCategoriaChart"></canvas>
-          </div>
-          <div class="chart-wrapper" id="ventasVsInversionChart-wrapper">
-              <canvas id="ventasVsInversionChart"></canvas>
-          </div>
+      <div class="analisis-item">
+        <h3><i data-lucide="trending-down" class="icon-danger"></i> Productos con Ventas Bajas</h3>
+        <ul id="analisis-productos-bajos"><li>Cargando...</li></ul>
       </div>
+      <div class="analisis-item">
+        <h3><i data-lucide="star" class="icon-success"></i> Productos Top en Ventas</h3>
+        <ul id="analisis-productos-top"><li>Cargando...</li></ul>
+      </div>
+      <div class="analisis-item">
+        <h3><i data-lucide="users" class="icon-info"></i> Clientes con Mayor Adeudo</h3>
+        <ul id="analisis-clientes-adeudo"><li>Cargando...</li></ul>
+      </div>
+    </div>
+    </div>
 
-  </div>
+    <div class="card">
+      <h2><i data-lucide="bar-chart-2"></i> Gráficas</h2>
+      <div class="charts-controls">
+        <button class="chart-btn active" data-chart="ventasPorCategoriaChart">Ventas por Categoría</button>
+        <button class="chart-btn" data-chart="inversionPorCategoriaChart">Inversión por Categoría</button>
+        <button class="chart-btn" data-chart="ventasVsInversionChart">Ventas vs. Inversión</button>
+      </div>
+      <div class="chart-wrapper active" id="ventasPorCategoriaChart-wrapper">
+        <canvas id="ventasPorCategoriaChart"></canvas>
+      </div>
+      <div class="chart-wrapper" id="inversionPorCategoriaChart-wrapper">
+        <canvas id="inversionPorCategoriaChart"></canvas>
+      </div>
+      <div class="chart-wrapper" id="ventasVsInversionChart-wrapper">
+        <canvas id="ventasVsInversionChart"></canvas>
+      </div>
+    </div>
 
     </section>
 
@@ -153,16 +182,34 @@
       </div>
 
       <div id="cliente-detalle-info" class="hidden">
-          <div class="card">
-              <h3>Datos Personales</h3>
-              <p><strong>Nombre:</strong> <span id="detalle-nombre">--</span></p>
-              <p><strong>Teléfono:</strong> <span id="detalle-telefono">--</span></p>
-              <p><strong>Domicilio:</strong> <span id="detalle-domicilio">--</span></p>
-          </div>
-          <div class="card grid">
-              <div class="sub-card"><h4>Total Comprado</h4><p class="value" id="detalle-comprado">$0.00</p></div>
-              <div class="sub-card"><h4>Total Abonado</h4><p class="value" id="detalle-abonado">$0.00</p></div>
-              <div class="sub-card saldo-deudor"><h4>Saldo Deudor</h4><p class="value" id="detalle-saldo">$0.00</p></div>
+          <div class="cliente-detalle-wrapper">
+            <div class="cliente-detalle-col izq">
+              <div class="card datos-personales">
+                <h3>Datos Personales</h3>
+                <p><strong>Nombre:</strong> <span id="detalle-nombre">--</span></p>
+                <p><strong>Teléfono:</strong> <span id="detalle-telefono">--</span></p>
+                <p><strong>Domicilio:</strong> <span id="detalle-domicilio">--</span></p>
+              </div>
+            </div>
+            <div class="cliente-detalle-col der">
+              <div class="card resumen-financiero">
+                <div class="resumen-grid">
+                  <div class="resumen-col-izq">
+                    <div class="sub-card"><h4>Total Comprado</h4><p class="value" id="detalle-comprado">$0.00</p></div>
+                    <div class="sub-card"><h4>Total Abonado</h4><p class="value" id="detalle-abonado">$0.00</p></div>
+                  </div>
+                  <div class="resumen-col-der">
+                    <div class="sub-card" id="saldo-card">
+                      <h4 id="detalle-saldo-titulo">Saldo Deudor</h4>
+                      <p class="value" id="detalle-saldo">$0.00</p>
+                    </div>
+                    <div class="sub-card grafica-ventas-abonos" style="display: flex; align-items: center; justify-content: center;">
+                      <canvas id="grafica-ventas-abonos" width="140" height="70"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="card">
@@ -535,17 +582,66 @@
           <input type="date" name="fecha_venta" required />
 
           <label>Cantidad:</label>
-          <input type="number" name="cantidad" min="1" required />
+          <input type="number" name="cantidad" id="cantidadModificarVenta" min="1" required />
 
           <label>Precio Unitario:</label>
-          <input type="number" step="0.01" name="precio_unitario" required />
+          <input type="number" step="0.01" name="precio_unitario" id="precioModificarVenta" required />
+
+          <!-- Campo de solo lectura para mostrar el subtotal -->
+          <label>Subtotal:</label>
+          <input type="number" step="0.01" name="subtotal" id="subtotalModificarVenta" readonly />
         </div>
 
         <div class="modal-actions">
-          <button type="submit" class="option-btn warning">Guardar Cambios</button>
-          <button type="button" class="close-modal option-btn danger">Cancelar</button>
+          <button type="submit" class="option-btn warning">
+            <i data-lucide="save"></i> Guardar Cambios
+          </button>
+          <button type="button" class="close-modal option-btn danger">
+            <i data-lucide="x"></i> Cancelar
+          </button>
         </div>
       </form>
+    </div>
+  </div>
+
+
+  <!-- Modal WhatsApp -->
+  <div id="modalWhatsappSelection" class="modal hidden">
+    <div class="modal-content" style="width: 500px; max-width: 95%;">
+      <h2>Seleccionar Clientes para Enviar Saldo</h2>
+      <div id="whatsapp-client-list" style="max-height: 40vh; overflow-y: auto; margin-bottom: 1rem; border: 1px solid #eee; padding: 10px; border-radius: 8px;">
+        <p>Cargando clientes con saldo pendiente...</p>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem;">
+        <input type="checkbox" id="whatsapp-select-all" style="width: auto;">
+        <label for="whatsapp-select-all" style="margin-bottom: 0;">Seleccionar todos</label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="generateWhatsappMessages" class="option-btn" style="background-color: #25D366; color: white; border-color: #25D366;"><i data-lucide="send"></i> Generar Mensajes</button>
+        <button type="button" id="closeWhatsappSelectionModal" class="option-btn danger"><i data-lucide="x"></i> Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalWhatsappSender" class="modal hidden">
+    <div class="modal-content" style="width: 600px; max-width: 95%;">
+      <h2>Enviar Mensajes de WhatsApp</h2>
+      <div class="table-container" style="max-height: 50vh;">
+        <table id="whatsapp-sender-table">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Acción</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            </tbody>
+        </table>
+      </div>
+      <div class="modal-actions" style="justify-content: flex-end;">
+        <button type="button" id="closeWhatsappSenderModal" class="option-btn"><i data-lucide="check"></i> Finalizar</button>
+      </div>
     </div>
   </div>
 

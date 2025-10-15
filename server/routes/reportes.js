@@ -107,7 +107,16 @@ router.get('/graficas', async (req, res) => {
 // GET /api/reportes/analisis-rapido
 router.get('/analisis-rapido', async (req, res) => {
     try {
-        // 1. Categorías con ventas < inversión (ahora devuelve los montos)
+        const { mes } = req.query;
+        let whereVentas = '';
+        if (mes) {
+            const [year, month] = mes.split('-');
+            const startDate = new Date(year, month - 1, 1).toISOString().slice(0, 10);
+            const endDate = new Date(year, month, 0).toISOString().slice(0, 10);
+            whereVentas = `WHERE v.fecha_venta BETWEEN '${startDate}' AND '${endDate}'`;
+        }
+
+        // 1. Categorías con ventas < inversión (filtrado por mes)
         const [categoriasEnRiesgo] = await pool.query(`
             SELECT categoria, totalVentas, totalInversion FROM (
                 SELECT 
@@ -116,34 +125,35 @@ router.get('/analisis-rapido', async (req, res) => {
                     COALESCE(SUM(p.unidades_disponibles * p.precio_compra), 0) AS totalInversion
                 FROM categorias c
                 LEFT JOIN productos p ON c.categoria_id = p.categoria_id
-                LEFT JOIN ventas v ON p.producto_id = v.producto_id
+                LEFT JOIN ventas v ON p.producto_id = v.producto_id ${whereVentas}
                 GROUP BY c.nombre_categoria
             ) AS t
             WHERE t.totalVentas < t.totalInversion
         `);
 
-        // 2. Productos con ventas bajas (ahora devuelve el número de ventas)
+        // 2. Productos con ventas bajas (filtrado por mes)
         const [productosBajasVentas] = await pool.query(`
             SELECT p.nombre_producto, COUNT(v.venta_id) AS numero_ventas
             FROM productos p
-            LEFT JOIN ventas v ON p.producto_id = v.producto_id
+            LEFT JOIN ventas v ON p.producto_id = v.producto_id ${whereVentas}
             GROUP BY p.producto_id, p.nombre_producto
-            HAVING numero_ventas <= 2 -- Puedes ajustar este umbral (ej. 0, 1, 2)
+            HAVING numero_ventas <= 2
             ORDER BY numero_ventas ASC
             LIMIT 5
         `);
 
-        // 3. Productos top en ventas (ahora devuelve el monto vendido)
+        // 3. Productos top en ventas (filtrado por mes)
         const [productosTop] = await pool.query(`
             SELECT p.nombre_producto, SUM(v.cantidad * v.precio_unitario) AS totalVendido
             FROM ventas v
             JOIN productos p ON v.producto_id = p.producto_id
+            ${whereVentas}
             GROUP BY p.nombre_producto
             ORDER BY totalVendido DESC
             LIMIT 5
         `);
 
-        // 4. Clientes con mayor adeudo (ahora devuelve el saldo)
+        // 4. Clientes con mayor adeudo (no depende del mes)
         const [clientesConAdeudo] = await pool.query(`
             SELECT c.nombre, (COALESCE(ventas_totales, 0) - COALESCE(abonos_totales, 0)) AS saldo
             FROM clientes c
@@ -155,7 +165,7 @@ router.get('/analisis-rapido', async (req, res) => {
                 SELECT cliente_id, SUM(monto_abono) AS abonos_totales
                 FROM abonos GROUP BY cliente_id
             ) a ON c.cliente_id = a.cliente_id
-            HAVING saldo > 0.01 -- Usamos un pequeño margen para evitar saldos de centavos
+            HAVING saldo > 0.01
             ORDER BY saldo DESC
             LIMIT 5
         `);

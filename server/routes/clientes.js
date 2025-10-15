@@ -13,6 +13,32 @@ router.get('/', async (req, res) => {
   }
 });
 
+// =================================================================
+// NUEVA RUTA: OBTENER CLIENTES CON SALDO DEUDOR (MOVIDA Y CORREGIDA)
+// =================================================================
+router.get('/con-saldo', async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        c.cliente_id, 
+        c.nombre, 
+        c.telefono,
+        COALESCE((SELECT SUM(a.monto_abono) FROM abonos a WHERE a.cliente_id = c.cliente_id), 0) as total_abonado,
+        (COALESCE((SELECT SUM(v.cantidad * v.precio_unitario) FROM ventas v WHERE v.cliente_id = c.cliente_id), 0) - COALESCE((SELECT SUM(ab.monto_abono) FROM abonos ab WHERE ab.cliente_id = c.cliente_id), 0)) as saldo_deudor
+      FROM clientes c
+      GROUP BY c.cliente_id, c.nombre, c.telefono
+      HAVING saldo_deudor > 0
+      ORDER BY c.nombre;
+    `;
+    // CORRECCIÓN: Se cambió 'db.query' por 'pool.query' para que coincida con el resto del archivo.
+    const [clientes] = await pool.query(query);
+    res.json(clientes);
+  } catch (error) {
+    console.error("Error al obtener clientes con saldo:", error);
+    res.status(500).json({ error: "Error interno del servidor." });
+  }
+});
+
 // POST /api/clientes/agregar -> AHORA DEVUELVE EL NUEVO CLIENTE
 router.post('/agregar', async (req, res) => {
   try {

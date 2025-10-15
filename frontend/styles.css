@@ -3,6 +3,11 @@
   --c2: #FFC29B;
   --c3: #F39F9F;
   --c4: #B95E82;
+  --light-gray: #f8f9fa;
+  --dark-gray: #7f8c8d;
+  --dark-color: #333;
+  --danger-color: #e74c3c;
+  --primary-color: #3498db;
 }
 
 body {
@@ -54,23 +59,6 @@ h1 {
   font-size: 13px;
 }
 
-#refresh {
-  margin-top: 20px;
-  padding: 10px 16px;
-  border-radius: 8px;
-  border: none;
-  background: var(--c4);
-  color: white;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.2s ease;
-}
-
-#refresh:hover {
-  background: var(--c3);
-}
-
-/* Barra de pestañas */
 .tabs {
   display: flex;
   gap: 8px;
@@ -108,7 +96,6 @@ h1 {
   to {opacity: 1; transform: translateY(0);}
 }
 
-/* Opciones dentro de cada sección */
 .options-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -144,8 +131,6 @@ h1 {
   color: white;
 }
 
-
-/* Modal */
 .modal {
   position: fixed;
   top: 0; left: 0;
@@ -184,7 +169,7 @@ h1 {
 
 .modal-content label {
   font-weight: 500;
-  margin-bottom: 5px; /* separa el label del input */
+  margin-bottom: 5px;
 }
 
 .modal-content input,
@@ -211,498 +196,506 @@ h1 {
   display: none !important;
 }
 
+.resumen-actions-row {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.whatsapp-btn {
+  background-color: #25D366 !important;
+  border-color: #25D366 !important;
+  color: #fff !important;
+}
 
 .consulta-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-#cliente-detalle-info .grid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-}
-
-#cliente-detalle-info .sub-card {
-    background-color: #f8f9fa;
-    padding: 1rem;
-    border-radius: 8px;
-    text-align: center;
-}
-
-#cliente-detalle-info .sub-card h4 {
-    margin-top: 0;
-    color: #7f8c8d;
-}
-
-#cliente-detalle-info .sub-card .value {
-    font-size: 1.8rem;
-    margin-bottom: 0;
-}
-
-#cliente-detalle-info .saldo-deudor .value {
-    color: var(--danger-color); /* Rojo para el saldo deudor */
-}
-
-
-.consulta-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-    gap: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .consulta-header h2 {
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 #cliente-detalle-info {
-    margin-top: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
-#cliente-detalle-info .grid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+.cliente-detalle-wrapper {
+  display: grid;
+  grid-template-columns: 30% calc(70% - 24px);
+  gap: 24px;
+  align-items: start;
+  margin-bottom: 32px;
+}
+
+.resumen-financiero .resumen-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: stretch;
 }
 
 #cliente-detalle-info .sub-card {
-    background-color: var(--light-gray);
-    padding: 1rem;
-    border-radius: 8px;
-    text-align: center;
+  background-color: var(--light-gray);
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
 }
 
 #cliente-detalle-info .sub-card h4 {
-    margin-top: 0;
-    font-size: 1rem;
-    color: #7f8c8d;
-    font-weight: 600;
+  margin-top: 0;
+  font-size: 1rem;
+  color: var(--dark-gray);
+  font-weight: 600;
 }
 
-#cliente-detalle-info .saldo-deudor .value {
-    color: var(--danger-color);
+.saldo-deudor #detalle-saldo,
+.saldo-deudor #detalle-saldo-titulo {
+  color: #e74c3c !important;
 }
 
-#selectConsultaCliente {
-    width: 100%;
-    padding: 0.8rem;
-    font-size: 1rem;
-    border-radius: 5px;
-    border: 1px solid #ccc;
+.saldo-favor #detalle-saldo,
+.saldo-favor #detalle-saldo-titulo {
+  color: #2ecc71 !important;
 }
 
-/* Nuevos estilos para el diseño de las tablas de historial */
 .historial-grid {
-    display: grid;
-    grid-template-columns: 1fr; /* Una columna en móvil */
-    gap: 2rem;
-}
-
-@media (min-width: 992px) {
-    .historial-grid {
-        grid-template-columns: 3fr 2fr; /* Columna de ventas más ancha */
-    }
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
 }
 
 .historial-grid h3 {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 0;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid var(--light-gray);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--light-gray);
 }
 
 .table-container {
-    max-height: 300px;
-    overflow-y: auto;
+  max-height: 300px;
+  overflow-y: auto;
 }
 
 .table-container table {
-    width: 100%;
-    margin-top: 0;
-    border-collapse: collapse;
+  width: 100%;
+  margin-top: 0;
+  border-collapse: collapse;
 }
 
 .table-container th, .table-container td {
-    padding: 0.8rem;
-    text-align: left;
-    border-bottom: 1px solid #eee;
+  padding: 0.8rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
 }
 
 .table-container thead {
-    background-color: transparent;
-    color: var(--dark-gray);
-    font-weight: 600;
-}
-
-#consulta-productos-view .table-container {
-    max-height: 500px; /* Un poco más de altura para esta tabla */
-    overflow-y: auto;
-}
-
-#tabla-consulta-productos {
-    width: 100%;
-    margin-top: 0;
-    border-collapse: collapse;
-}
-
-#tabla-consulta-productos th, 
-#tabla-consulta-productos td {
-    padding: 0.8rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid #eee;
+  background-color: transparent;
+  color: var(--dark-gray);
+  font-weight: 600;
 }
 
 #tabla-consulta-productos thead {
-    background-color: transparent;
-    color: var(--dark-color);
-    font-weight: 600;
-    position: sticky; /* Encabezado fijo */
-    top: 0;
-    background: white; /* Fondo para que no se transparente el contenido al hacer scroll */
+  position: sticky;
+  top: 0;
+  background: white;
 }
 
 .card-filtros {
-    padding: 1rem 1.5rem;
-    background-color: #f8f9fa;
-    margin-bottom: 1.5rem;
-    display: flex;
-    gap: 2rem;
+  padding: 1rem 1.5rem;
+  background-color: #f8f9fa;
+  margin-bottom: 1.5rem;
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
 }
 
 .filtro-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.filtro-item label {
-    font-weight: 600;
-}
-
-.filtro-item select {
-    padding: 0.5rem;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-}
-
-/* Estilos para encabezados de tabla que se pueden ordenar */
 .sortable {
-    cursor: pointer;
-    user-select: none;
-    position: relative;
-    padding-right: 25px !important; /* Espacio para el ícono */
-}
-
-.sortable:hover {
-    background-color: #f0f0f0;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  padding-right: 25px !important;
 }
 
 .sort-icon {
-    width: 16px;
-    height: 16px;
-    position: absolute;
-    right: 5px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #aaa;
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #aaa;
 }
 
 .sortable.asc .sort-icon,
 .sortable.desc .sort-icon {
-    color: var(--primary-color);
-}
-
-/* ========================================================== */
-/* ESTILOS PARA LA VISTA DE HISTORIAL DE VENTAS */
-/* ========================================================== */
-
-.card-filtros {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-    align-items: center;
-}
-
-.filtro-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.filtro-item label {
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.filtro-item input[type="date"],
-.filtro-item select {
-    padding: 0.5rem;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    font-size: 0.9rem;
+  color: var(--primary-color);
 }
 
 .table-summary {
-    text-align: right;
-    margin-top: 1rem;
-    font-size: 1.2rem;
+  text-align: right;
+  margin-top: 1rem;
+  font-size: 1.2rem;
 }
 
-.table-summary span {
-    font-weight: bold;
-    color: var(--primary-color);
+.reportes-filtros {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
 }
-
-
-
-/* ========================================================== */
-/* ESTILOS PARA LA NUEVA PESTAÑA DE REPORTES */
-/* ========================================================== */
 
 .kpi-grid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    margin-top: 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 2.5rem;
 }
-@media (min-width: 1200px) {
-    .kpi-grid {
-        grid-template-columns: repeat(5, 1fr);
-    }
-}
-
-.kpi-grid .card .value-text {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin: 0.5rem 0;
-    line-height: 1.2;
-    min-height: 2.4em; 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#kpi-stock-critico-lista-container {
-    max-height: 80px;
-    overflow-y: auto;
-    margin: 8px 0;
-    padding: 0 10px;
-    /* --- CORRECCIÓN DE DISEÑO: Alinear texto a la izquierda --- */
-    text-align: left; 
-}
-
-#kpi-stock-critico-lista {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--dark-color);
-}
-
-#kpi-stock-critico-lista li {
-    padding: 2px 0;
-    white-space: nowrap;      /* Evita que los nombres largos se partan */
-    overflow: hidden;         /* Oculta lo que no quepa */
-    text-overflow: ellipsis;  /* Añade "..." si el nombre es muy largo */
-}
-
-.placeholder-text {
-    text-align: center;
-    margin-top: 3rem;
-    padding: 2rem;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    color: #95a5a6;
-}
-
-/* ========================================================== */
-/* ESTILOS PARA LAS GRÁFICAS DE REPORTES */
-/* ========================================================== */
-
-.charts-grid {
-    display: grid;
-    grid-template-columns: 1fr; /* Una columna en móvil */
-    gap: 2rem;
-    margin-top: 2rem;
-}
-
-@media (min-width: 992px) {
-    .charts-grid {
-        grid-template-columns: 1fr 1fr; /* Dos columnas en pantallas grandes */
-    }
-}
-
-.charts-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem; /* Espacio entre cada tarjeta de gráfica */
-    margin-top: 2rem;
-}
-
-.chart-container {
-    position: relative;
-    padding: 1rem;
-    /* Quitamos el borde de aquí para ponerlo en la tarjeta principal */
-}
-
-.chart-container h3 {
-    text-align: center;
-    margin-top: 0;
-    margin-bottom: 1rem;
-    font-weight: 600;
-    color: var(--dark-color);
-}
-
-/* ========================================================== */
-/* ESTILOS PARA GRÁFICAS CON BOTONES (ACTUALIZADO) */
-/* ========================================================== */
-
-.charts-controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    border-bottom: 2px solid #eee;
-    padding-bottom: 1rem;
-    margin-bottom: 1rem;
-}
-
-.chart-btn {
-    padding: 0.6rem 1rem;
-    border: 1px solid #ccc;
-    background-color: #f9f9f9;
-    cursor: pointer;
-    border-radius: 5px;
-    font-weight: 600;
-    transition: all 0.2s ease;
-}
-
-.chart-btn:hover {
-    background-color: #e9e9e9;
-}
-
-.chart-btn.active {
-    background-color: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-}
-
-.chart-wrapper {
-    display: none; /* Ocultas por defecto */
-}
-
-.chart-wrapper.active {
-    display: block; /* Solo se muestra la activa */
-}
-
-/* ========================================================== */
-/* ESTILOS PARA LA SECCIÓN DE ANÁLISIS RÁPIDO */
-/* ========================================================== */
 
 .analisis-grid {
-    display: grid;
-    grid-template-columns: 1fr; /* Una columna en móvil */
-    gap: 2rem;
-    margin-top: 1.5rem;
-}
-
-@media (min-width: 768px) {
-    .analisis-grid {
-        grid-template-columns: 1fr 1fr; /* Dos columnas en tabletas */
-    }
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-top: 1.5rem;
+  margin-bottom: 2.5rem;
 }
 
 .analisis-item h3 {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 1.1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eee;
 }
 
 .analisis-item ul {
-    list-style-type: none;
-    padding-left: 10px;
-    margin-top: 0.5rem;
+  list-style-type: none;
+  padding-left: 10px;
+  margin-top: 0.5rem;
 }
 
 .analisis-item li {
-    padding: 5px 0;
-    font-size: 0.95rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  padding: 5px 0;
+  font-size: 0.95rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-/* Colores para los iconos tipo semáforo */
-.icon-warning { color: #f39c12; } /* Naranja */
-.icon-danger { color: #e74c3c; }  /* Rojo */
-.icon-success { color: #2ecc71; } /* Verde */
-.icon-info { color: var(--primary-color); } /* Azul */
+.icon-warning { color: #f39c12; }
+.icon-danger { color: #e74c3c; }
+.icon-success { color: #2ecc71; }
+.icon-info { color: var(--primary-color); }
 
-
-/* Nuevo estilo para los detalles numéricos */
 .detalle-analisis {
-    font-size: 0.85rem;
-    color: #7f8c8d; /* Un gris sutil */
-    font-weight: 500;
-    margin-left: 10px;
-    white-space: nowrap;
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  font-weight: 500;
+  margin-left: 10px;
+  white-space: nowrap;
 }
 
-.consulta-header {
-    display: flex;
-    justify-content: space-between; /* Mantiene el título a la izq. y los botones a la der. */
+.charts-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+.chart-btn {
+  background: #f5f5f5;
+  border: 1px solid #ccc;
+  color: #333;
+  padding: 8px 14px;
+  margin: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.chart-btn:hover {
+  background: #e0e0e0;
+}
+
+.chart-btn.active {
+  background: #FFC29B;
+  color: black;
+  border-color: #FFC29B;
+}
+
+.chart-wrapper {
+  display: none;
+}
+
+.chart-wrapper.active {
+  display: block;
+}
+
+.fab-menu {
+  display: none; /* Oculto por defecto en escritorio */
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1200;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--c4);
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+  border: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.fab-menu:active {
+  background: var(--c3);
+}
+
+.mobile-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 40;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.mobile-menu-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mobile-bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  width: 100vw;
+  background: #fff;
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.18);
+  z-index: 50;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(.4,1.4,.6,1);
+  padding: 24px 0 16px 0;
+  max-width: 480px;
+  margin: 0 auto;
+  left: 50%;
+  transform: translate(-50%, 100%);
+}
+
+.mobile-bottom-sheet.active {
+  transform: translate(-50%, 0);
+}
+
+.mobile-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.mobile-nav-btn {
+  width: 90%;
+  padding: 16px;
+  font-size: 18px;
+  border: none;
+  border-radius: 10px;
+  background: var(--c2);
+  color: #333;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-start;
+  cursor: pointer;
+}
+
+.mobile-nav-btn:active,
+.mobile-nav-btn.active {
+  background: var(--c4);
+  color: #fff;
+}
+
+.value-with-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.value-with-action .option-btn {
+  padding: 8px;
+  height: auto;
+  line-height: 1;
+}
+
+.card-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  padding: 10px;
+}
+
+#whatsapp-client-list .client-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 4px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+#whatsapp-sender-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#whatsapp-sender-table th,
+#whatsapp-sender-table td {
+    padding: 12px 8px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+#whatsapp-sender-table .btn-send-whatsapp {
+    display: inline-flex;
     align-items: center;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap; /* Permite que los filtros bajen en pantallas muy pequeñas */
-    gap: 1rem;
+    gap: 6px;
+    padding: 6px 12px;
+    background-color: #25D366;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+#whatsapp-sender-table .status.pendiente {
+    color: #e67e22;
+}
+
+#whatsapp-sender-table .status.enviado {
+    color: #2ecc71;
+}
+
+#whatsapp-sender-table .btn-send-whatsapp.disabled {
+    background-color: #95a5a6;
+    pointer-events: none;
+    cursor: not-allowed;
 }
 
 
+/* --- Media Queries para Responsive Design --- */
 
-/* --- Contenedor de los filtros de reportes --- */
-.reportes-filtros {
+@media (min-width: 992px) {
+  .historial-grid {
+    grid-template-columns: 3fr 2fr;
+  }
+  .charts-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 768px) {
+  .analisis-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .cliente-detalle-wrapper, .resumen-financiero .resumen-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 800px) {
+    .cliente-detalle-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+  .tabs {
+    display: none !important;
+  }
+  .fab-menu {
     display: flex;
-    align-items: center;
-    gap: 0.75rem; /* Espacio reducido entre elementos del filtro */
-    flex-wrap: nowrap; /* Evita que los elementos del filtro se separen en varias líneas */
+  }
 }
 
-.reportes-filtros label {
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: #555;
-}
-
-#reportes-month-filter {
+@media (max-width: 600px) {
+  body {
+    margin: 8px;
+    font-size: 15px;
+  }
+  .container {
+    padding: 0 4px;
+  }
+  .grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px;
+  }
+  #resumen .grid {
+      grid-template-columns: 1fr 1fr !important;
+  }
+  .options-grid, .analisis-grid, .charts-grid, .cliente-detalle-wrapper, .resumen-financiero .resumen-grid {
+      grid-template-columns: 1fr;
+  }
+  .card {
+    padding: 10px;
+    font-size: 15px;
+  }
+  #resumen .card {
+    font-size: 25px;
+  }
+  #resumen .card h2 {
+    font-size: 1.1rem;
+  }
+  #resumen .value {
+    font-size: 1.3rem;
+  }
+  .modal-content {
+    width: 98vw;
+    padding: 12px 4px;
+  }
+  .modal-actions {
+    flex-direction: column;
+  }
+  .card-filtros {
+    flex-direction: column;
+    padding: 8px 4px;
+  }
+  .table-container th, .table-container td {
     padding: 0.5rem;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    font-size: 0.9rem;
-    font-family: var(--font-family);
-    background-color: white;
-}
-
-/* Ajuste específico para el botón de actualizar en esta sección */
-#refresh-reportes {
-    padding: 0.6rem 1rem;
-    font-size: 0.9rem;
-}
-
-
-/* Estilos para los campos del formulario de modificación cuando aparecen */
-#formModificarCliente select {
-    margin-bottom: 1rem;
+    font-size: 13px;
+  }
 }

@@ -1,36 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- INICIALIZACIÓN GENERAL ---
     lucide.createIcons();
+    const API_BASE_URL = "http://localhost:4000/api";
 
-    
-    // ...existing code...
-    // ------------------------------------------------------------------
-    // URL remota por defecto (ajusta si usas otra deployment)
-    const REMOTE_BASE_URL = "https://basededatos-production-184c.up.railway.app";
-
-    const IS_LOCALHOST = window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.168');
-    let BASE_URL = IS_LOCALHOST ? "http://localhost:4000" : REMOTE_BASE_URL; // usa localhost en desarrollo o la URL remota en producción
-    
-    // 📢 NUEVA LÍNEA CLAVE: Verifica y elimina la barra final para evitar la doble barra (//) en el fetch.
-    if (BASE_URL.endsWith('/')) {
-        BASE_URL = BASE_URL.slice(0, -1);
-    }
-
-    // Registro del Service Worker para el PWA
-    if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        // La ruta '/' es relativa a la raíz del dominio (Railway)
-        navigator.serviceWorker.register('/service-worker.js') 
-        .then(registration => {
-            console.log('ServiceWorker registrado con éxito:', registration);
-        })
-        .catch(error => {
-            console.log('Fallo el registro de ServiceWorker:', error);
-        });
-    });
-    }
-    // ------------------------------------------------------------------
-    
     // --- MANEJO DE PESTAÑAS ---
     const tabs = document.querySelectorAll(".tab-btn");
     const contents = document.querySelectorAll(".tab-content");
@@ -63,18 +35,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- RESUMEN FINANCIERO ---
     async function fetchSummary() {
         try {
-            const res = await fetch(`${BASE_URL}/api/summary`);
+            const res = await fetch(`${API_BASE_URL}/summary`);
             if (!res.ok) throw new Error('Error al obtener el resumen');
             const data = await res.json();
-            document.getElementById("totalVentas").textContent = "$" + (data.totalVentas || 0).toFixed(2);
-            document.getElementById("totalAbonos").textContent = "$" + (data.totalAbonos || 0).toFixed(2);
-            document.getElementById("totalPorCobrar").textContent = "$" + (data.totalPorCobrar || 0).toFixed(2);
-            document.getElementById("totalGananciaPorDia").textContent = "$" + (data.totalGananciaPorDia || 0).toFixed(2);
-            document.getElementById("totalInvertidoEnProductos").textContent = "$" + (data.totalInvertidoEnProductos || 0).toFixed(2);
-        } catch (err) {
-            console.error("Error fetching summary:", err); 
-            throw new Error("Error al obtener el resumen"); // Lanza un error más claro
-        }
+            document.getElementById("totalVentas").textContent = "$" + Number(data.totalVentas || 0).toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById("totalAbonos").textContent = "$" + Number(data.totalAbonos || 0).toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById("totalPorCobrar").textContent = "$" + Number(data.totalPorCobrar || 0).toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById("totalGananciaPorDia").textContent = "$" + Number(data.totalGananciaPorDia || 0).toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById("totalInvertidoEnProductos").textContent = "$" + Number(data.totalInvertidoEnProductos || 0).toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        } catch (err) { console.error("Error fetching summary:", err); }
     }
     document.getElementById("refresh").addEventListener("click", fetchSummary);
     fetchSummary();
@@ -99,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function populateProductsDropdown() {
         try {
-            const res = await fetch(`${BASE_URL}/api/productos`);
+            const res = await fetch(`${API_BASE_URL}/productos`);
             if (!res.ok) throw new Error('No se pudo cargar la lista de productos');
             productosData = await res.json();
             selectProducto.innerHTML = '<option value="">-- Selecciona un producto --</option>';
@@ -115,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function populateCategoriesDropdown() {
         try {
-            const res = await fetch(`${BASE_URL}/api/categorias`);
+            const res = await fetch(`${API_BASE_URL}/categorias`);
             if (!res.ok) throw new Error('No se pudo cargar la lista de categorías');
             const categoriasData = await res.json();
             selectCategoria.innerHTML = '<option value="">-- Selecciona una categoría --</option>';
@@ -178,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else { delete data.producto_id; }
         if (data.categoria_id !== 'nueva') { delete data.nombre_categoria; } else { delete data.categoria_id; }
         try {
-            const res = await fetch(`${BASE_URL}/api/productos/agregar`, {
+            const res = await fetch(`${API_BASE_URL}/productos/agregar`, {
                 method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data)
             });
             const result = await res.json();
@@ -205,13 +174,16 @@ document.addEventListener('DOMContentLoaded', () => {
         modalCliente.classList.add("hidden");
         modalCliente.classList.remove('on-top');
         formCliente.reset();
+        // Oculta campos dinámicos si existen
+        const campos = modalCliente.querySelector('[id^="campos"]');
+        if (campos) campos.classList.add('hidden');
     });
     formCliente.addEventListener("submit", async (e) => {
         e.preventDefault();
         const formData = new FormData(formCliente);
         const data = Object.fromEntries(formData.entries());
         try {
-            const res = await fetch(`${BASE_URL}/api/clientes/agregar`, {
+            const res = await fetch(`${API_BASE_URL}/clientes/agregar`, {
                 method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data)
             });
             const result = await res.json();
@@ -226,6 +198,151 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) { alert(`❌ Error: ${err.message}`); }
     });
 
+
+    // =============================================================
+    // ===== LÓGICA PARA ENVIAR RECORDATORIOS POR WHATSAPP =====
+    // =============================================================
+
+    const openWhatsappModalBtn = document.getElementById("openWhatsappModal");
+    const whatsappSelectionModal = document.getElementById("modalWhatsappSelection");
+    const closeWhatsappSelectionModalBtn = document.getElementById("closeWhatsappSelectionModal");
+    const clientListContainer = document.getElementById("whatsapp-client-list");
+    const selectAllCheckbox = document.getElementById("whatsapp-select-all");
+    const generateMessagesBtn = document.getElementById("generateWhatsappMessages");
+    
+    const whatsappSenderModal = document.getElementById("modalWhatsappSender");
+    const closeWhatsappSenderModalBtn = document.getElementById("closeWhatsappSenderModal");
+    const senderTableBody = document.querySelector("#whatsapp-sender-table tbody");
+
+    // 1. Abrir el modal de selección de clientes
+    if(openWhatsappModalBtn) {
+        openWhatsappModalBtn.addEventListener("click", async () => {
+            whatsappSelectionModal.classList.remove("hidden");
+            clientListContainer.innerHTML = "<p>Cargando clientes con saldo pendiente...</p>";
+            selectAllCheckbox.checked = false;
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/clientes/con-saldo`);
+                if (!res.ok) throw new Error("No se pudo obtener la lista de clientes con saldo.");
+                
+                const clientes = await res.json();
+                
+                if (clientes.length === 0) {
+                    clientListContainer.innerHTML = "<p>No hay clientes con saldo deudor en este momento.</p>";
+                    return;
+                }
+
+                // Poblar la lista
+                clientListContainer.innerHTML = '';
+                clientes.forEach(cliente => {
+                    const saldoFormateado = Number(cliente.saldo_deudor).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+                    const itemHTML = `
+                        <div class="client-item">
+                            <input type="checkbox" class="whatsapp-client-checkbox" value="${cliente.cliente_id}" data-cliente='${JSON.stringify(cliente)}'>
+                            <label>${cliente.nombre}</label>
+                            <span class="saldo">${saldoFormateado}</span>
+                        </div>
+                    `;
+                    clientListContainer.innerHTML += itemHTML;
+                });
+
+            } catch (err) {
+                clientListContainer.innerHTML = `<p style="color: red;">${err.message}</p>`;
+            }
+        });
+    }
+
+    // 2. Funcionalidad del checkbox "Seleccionar todos"
+    selectAllCheckbox.addEventListener("change", () => {
+        const checkboxes = document.querySelectorAll(".whatsapp-client-checkbox");
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = selectAllCheckbox.checked;
+        });
+    });
+
+    // 3. Cerrar el modal de selección
+    closeWhatsappSelectionModalBtn.addEventListener("click", () => {
+        whatsappSelectionModal.classList.add("hidden");
+    });
+
+    // 4. Generar los mensajes y abrir el segundo modal
+    generateMessagesBtn.addEventListener("click", () => {
+        const selectedCheckboxes = document.querySelectorAll(".whatsapp-client-checkbox:checked");
+        if (selectedCheckboxes.length === 0) {
+            alert("Por favor, selecciona al menos un cliente.");
+            return;
+        }
+
+        senderTableBody.innerHTML = ''; // Limpiar la tabla
+        const nombreNegocio = "Tu Negocio"; // <-- CAMBIAR POR EL NOMBRE REAL
+
+        selectedCheckboxes.forEach(checkbox => {
+            const cliente = JSON.parse(checkbox.dataset.cliente);
+            
+            // Validar que el cliente tenga teléfono
+            if (!cliente.telefono || cliente.telefono.length < 10) {
+                 const row = `
+                    <tr>
+                        <td>${cliente.nombre}</td>
+                        <td><span style="color: red;">Teléfono no válido</span></td>
+                        <td class="status pendiente">Pendiente</td>
+                    </tr>`;
+                senderTableBody.innerHTML += row;
+                return; // Saltar al siguiente cliente
+            }
+
+            // Construir mensaje y URL de WhatsApp
+            const totalAbonado = Number(cliente.total_abonado || 0).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+            const saldoDeudor = Number(cliente.saldo_deudor).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+            
+            const mensaje = `Hola ${cliente.nombre}, te saludamos de ${nombreNegocio}. Te escribimos para informarte sobre el estado de tu cuenta. Hasta la fecha, has abonado un total de ${totalAbonado} y tienes un saldo pendiente de ${saldoDeudor}. ¡Gracias!`;
+            
+            // Asegurarse de que el número esté en formato internacional (ej. 52 para México)
+            const telefonoInternacional = `521${cliente.telefono.replace(/\s+/g, '')}`;
+
+            const whatsappUrl = `https://wa.me/${telefonoInternacional}?text=${encodeURIComponent(mensaje)}`;
+
+            const row = `
+                <tr data-cliente-id="${cliente.cliente_id}">
+                    <td>${cliente.nombre}</td>
+                    <td>
+                        <a href="${whatsappUrl}" target="_blank" class="btn-send-whatsapp" data-cliente-id="${cliente.cliente_id}">
+                            <i data-lucide="send"></i> Enviar Mensaje
+                        </a>
+                    </td>
+                    <td class="status pendiente">Pendiente</td>
+                </tr>
+            `;
+            senderTableBody.innerHTML += row;
+        });
+
+        lucide.createIcons(); // Re-renderizar los íconos de Lucide
+        whatsappSelectionModal.classList.add("hidden");
+        whatsappSenderModal.classList.remove("hidden");
+    });
+
+    // 5. Marcar como enviado al hacer clic en el botón de la tabla
+    senderTableBody.addEventListener("click", (e) => {
+        const target = e.target.closest(".btn-send-whatsapp");
+        if (target) {
+            const clienteId = target.dataset.clienteId;
+            const row = senderTableBody.querySelector(`tr[data-cliente-id="${clienteId}"]`);
+            if (row) {
+                const statusCell = row.querySelector(".status");
+                statusCell.textContent = "Enviado ✔️";
+                statusCell.classList.remove("pendiente");
+                statusCell.classList.add("enviado");
+                target.classList.add("disabled"); // Deshabilitar el botón visualmente
+            }
+        }
+    });
+
+    // 6. Cerrar el modal de envío
+    closeWhatsappSenderModalBtn.addEventListener("click", () => {
+        whatsappSenderModal.classList.add("hidden");
+    });
+
+
     // --- LÓGICA MODAL ABONOS ---
     const openBtnAbono = document.getElementById("openAddAbono");
     const closeBtnAbono = document.getElementById("closeModalAbono");
@@ -234,7 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function populateClientsDropdown(selectElement) {
         try {
-            const res = await fetch(`${BASE_URL}/api/clientes`);
+            const res = await fetch(`${API_BASE_URL}/clientes`);
             if (!res.ok) throw new Error('No se pudo cargar la lista de clientes');
             const clientes = await res.json();
             const currentValue = selectElement.value;
@@ -261,13 +378,20 @@ document.addEventListener('DOMContentLoaded', () => {
         populateClientsDropdown(selectClienteAbono);
         modalAbono.classList.remove("hidden");
     });
-    closeBtnAbono.addEventListener("click", () => modalAbono.classList.add("hidden"));
+    closeBtnAbono.addEventListener("click", () => {
+        modalAbono.classList.add("hidden");
+        modalAbono.classList.remove('on-top');
+        formAbono.reset();
+        // Oculta campos dinámicos si existen
+        const campos = modalAbono.querySelector('[id^="campos"]');
+        if (campos) campos.classList.add('hidden');
+    });
     formAbono.addEventListener("submit", async (e) => {
         e.preventDefault();
         const formData = new FormData(formAbono);
         const data = Object.fromEntries(formData.entries());
         try {
-            const res = await fetch(`${BASE_URL}/api/abonos/agregar`, {
+            const res = await fetch(`${API_BASE_URL}/abonos/agregar`, {
                 method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data)
             });
             const result = await res.json();
@@ -287,7 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function populateProductsDropdownVenta() {
         try {
-            const res = await fetch(`${BASE_URL}/api/productos`);
+            const res = await fetch(`${API_BASE_URL}/productos`);
             if (!res.ok) throw new Error('No se pudo cargar la lista de productos');
             const productos = await res.json();
             selectProductoVenta.productosData = productos;
@@ -304,12 +428,26 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) { console.error('Error al cargar productos para venta:', err); }
     }
 
-    selectProductoVenta.addEventListener('change', (e) => {
+    selectProductoVenta.addEventListener('change', async (e) => { // Se añade 'async'
         const selectedId = e.target.value;
+
         if (selectedId === 'nuevo_producto') {
+            // 1. Cargamos los datos necesarios para el pop-up de producto
+            await populateProductsDropdown();
+            await populateCategoriesDropdown();
+            
+            // 2. Abrimos el pop-up
             modalProducto.classList.add('on-top');
             modalProducto.classList.remove('hidden');
+            
+            // 3. Forzamos el estado a "nuevo producto"
+            document.getElementById('formProducto').reset();
+            const selectProductoAnidado = document.getElementById('selectProducto');
+            selectProductoAnidado.value = 'nuevo';
+            selectProductoAnidado.dispatchEvent(new Event('change'));
+            
         } else {
+            // Esto se mantiene igual para cuando seleccionas un producto existente
             const producto = selectProductoVenta.productosData?.find(p => p.producto_id == selectedId);
             formVenta.querySelector('input[name="precio_unitario"]').value = producto ? (producto.precio_venta || '') : '';
         }
@@ -335,7 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData(formVenta);
         const data = Object.fromEntries(formData.entries());
         try {
-            const res = await fetch(`${BASE_URL}/api/ventas/agregar`, {
+            const res = await fetch(`${API_BASE_URL}/ventas/agregar`, {
                 method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data)
             });
             const result = await res.json();
@@ -355,7 +493,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function populateDeleteAbonosDropdown() {
         try {
-            const res = await fetch(`${BASE_URL}/api/abonos`);
+            const res = await fetch(`${API_BASE_URL}/abonos`);
             if (!res.ok) throw new Error("No se pudo cargar la lista de abonos");
             const abonos = await res.json();
             selectDeleteAbono.innerHTML = '<option value="">-- Selecciona un abono --</option>';
@@ -386,7 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!abonoId) return;
         if (!confirm("¿Seguro que deseas eliminar este abono?")) return;
         try {
-            const res = await fetch(`${BASE_URL}/api/abonos/${abonoId}`, { method: "DELETE" });
+            const res = await fetch(`${API_BASE_URL}/abonos/${abonoId}`, { method: "DELETE" });
             const result = await res.json();
             if (!res.ok) throw new Error(result.error);
             alert(`✅ ${result.message}`);
@@ -411,7 +549,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Llenar el select con los productos
         try {
-            const res = await fetch(`${BASE_URL}/api/productos`);
+            const res = await fetch(`${API_BASE_URL}/productos`);
             if (!res.ok) throw new Error('No se pudo cargar la lista de productos');
             const productos = await res.json();
 
@@ -443,7 +581,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!confirm('¿Seguro que deseas eliminar este producto?')) return;
 
         try {
-            const res = await fetch(`${BASE_URL}/api/productos/${productoId}`, { method: 'DELETE' });
+            const res = await fetch(`${API_BASE_URL}/productos/${productoId}`, { method: 'DELETE' });
             const data = await res.json();
             if (res.ok) {
                 alert('Producto eliminado correctamente.');
@@ -469,7 +607,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function populateDeleteVentasDropdown() {
     try {
-    const res = await fetch(`${BASE_URL}/api/ventas`);
+        const res = await fetch(`${API_BASE_URL}/ventas`);
         const ventas = await res.json();
         selectDeleteVenta.innerHTML = '<option value="">-- Selecciona una venta --</option>';
         ventas.forEach(v => {
@@ -503,7 +641,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!confirm('¿Seguro que deseas eliminar esta venta?')) return;
 
     try {
-            const res = await fetch(`${BASE_URL}/api/ventas/${ventaId}`, { method: 'DELETE' });
+        const res = await fetch(`${API_BASE_URL}/ventas/${ventaId}`, { method: 'DELETE' });
         const data = await res.json();
         if (data.success) {
         alert('Venta eliminada correctamente.');
@@ -531,7 +669,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function populateDeleteClientesDropdown() {
         try {
             selectDeleteCliente.innerHTML = '<option value="">-- Cargando clientes... --</option>';
-            const res = await fetch(`${BASE_URL}/api/clientes`);
+            const res = await fetch(`${API_BASE_URL}/clientes`);
             if (!res.ok) throw new Error("No se pudo cargar la lista de clientes");
             const clientes = await res.json();
 
@@ -575,7 +713,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const res = await fetch(`${BASE_URL}/api/clientes/${clienteId}`, { 
+            const res = await fetch(`${API_BASE_URL}/clientes/${clienteId}`, { 
                 method: "DELETE" 
             });
             const data = await res.json();
@@ -663,7 +801,7 @@ document.addEventListener('DOMContentLoaded', () => {
             clienteDetalleInfo.classList.add('hidden');
             try {
                 selectConsultaCliente.innerHTML = '<option value="">-- Cargando clientes... --</option>';
-                const res = await fetch(`${BASE_URL}/api/clientes`);
+                const res = await fetch(`${API_BASE_URL}/clientes`);
                 if (!res.ok) throw new Error('No se pudo cargar la lista de clientes');
                 const clientes = await res.json();
                 
@@ -693,8 +831,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${new Date(venta.fecha_venta).toLocaleDateString()}</td>
                 <td>${venta.nombre_producto}</td>
                 <td>${venta.cantidad}</td>
-                <td>$${parseFloat(venta.precio_unitario).toFixed(2)}</td>
-                <td>$${parseFloat(venta.subtotal).toFixed(2)}</td>
+                <td>$${Number(venta.precio_unitario).toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td>$${Number(venta.subtotal).toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             </tr>`;
             tablaVentasBody.innerHTML += row;
         });
@@ -710,7 +848,7 @@ document.addEventListener('DOMContentLoaded', () => {
         abonos.forEach(abono => {
             const row = `<tr>
                 <td>${new Date(abono.fecha_abono).toLocaleDateString()}</td>
-                <td>$${parseFloat(abono.monto_abono).toFixed(2)}</td>
+                <td>$${Number(abono.monto_abono).toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             </tr>`;
             tablaAbonosBody.innerHTML += row;
         });
@@ -724,9 +862,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         try {
             const [detallesRes, ventasRes, abonosRes] = await Promise.all([
-                fetch(`${BASE_URL}/api/clientes/${clienteId}/detalles`),
-                fetch(`${BASE_URL}/api/ventas/cliente/${clienteId}`),
-                fetch(`${BASE_URL}/api/abonos/cliente/${clienteId}`)
+                fetch(`${API_BASE_URL}/clientes/${clienteId}/detalles`),
+                fetch(`${API_BASE_URL}/ventas/cliente/${clienteId}`),
+                fetch(`${API_BASE_URL}/abonos/cliente/${clienteId}`)
             ]);
 
             if (!detallesRes.ok) throw new Error('No se pudo obtener la información del cliente.');
@@ -738,9 +876,57 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('detalle-nombre').textContent = detalles.nombre || 'N/A';
             document.getElementById('detalle-telefono').textContent = detalles.telefono || 'N/A';
             document.getElementById('detalle-domicilio').textContent = detalles.domicilio || 'N/A';
-            document.getElementById('detalle-comprado').textContent = `$${(detalles.totalComprado || 0).toFixed(2)}`;
-            document.getElementById('detalle-abonado').textContent = `$${(detalles.totalAbonado || 0).toFixed(2)}`;
-            document.getElementById('detalle-saldo').textContent = `$${(detalles.saldoDeudor || 0).toFixed(2)}`;
+            document.getElementById('detalle-comprado').textContent = `$${Number(detalles.totalComprado || 0).toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('detalle-abonado').textContent = `$${Number(detalles.totalAbonado || 0).toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            const saldo = Number(detalles.saldoDeudor || 0);
+            const totalComprado = Number(detalles.totalComprado || 0);
+            const totalAbonado = Number(detalles.totalAbonado || 0);
+            const saldoCard = document.getElementById('saldo-card');
+            const saldoTitulo = document.getElementById('detalle-saldo-titulo');
+            const saldoValue = document.getElementById('detalle-saldo');
+            saldoValue.textContent = `$${Math.abs(saldo).toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            if (totalAbonado > totalComprado) {
+                saldoCard.classList.remove('saldo-deudor');
+                saldoCard.classList.add('saldo-favor');
+                saldoTitulo.textContent = 'Saldo a Favor';
+            } else {
+                saldoCard.classList.remove('saldo-favor');
+                saldoCard.classList.add('saldo-deudor');
+                saldoTitulo.textContent = 'Saldo Deudor';
+            }
+
+            // Mostrar gráfica de ventas vs abonos
+            const ctxGrafica = document.getElementById('grafica-ventas-abonos').getContext('2d');
+            if (window.graficaVentasAbonosInstance) {
+                window.graficaVentasAbonosInstance.destroy();
+            }
+            window.graficaVentasAbonosInstance = new Chart(ctxGrafica, {
+                type: 'bar',
+                data: {
+                    labels: ['Ventas', 'Abonos'],
+                    datasets: [{
+                        label: 'Montos',
+                        data: [Number(detalles.totalComprado || 0), Number(detalles.totalAbonado || 0)],
+                        backgroundColor: ['#F39F9F', '#2ecc71'],
+                        borderRadius: 8,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => '$' + Number(value).toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+                            }
+                        }
+                    }
+                }
+            });
 
             renderizarHistorialVentas(historialVentas);
             renderizarHistorialAbonos(historialAbonos);
@@ -771,8 +957,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>${p.nombre_producto}</td>
                     <td>${p.nombre_categoria || 'N/A'}</td>
                     <td>${p.unidades_disponibles}</td>
-                    <td>$${parseFloat(p.precio_compra).toFixed(2)}</td>
-                    <td>$${subtotal.toFixed(2)}</td>
+                    <td>$${Number(p.precio_compra).toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td>$${Number(subtotal).toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                     <td>${p.codigo_barras || 'N/A'}</td>
                 </tr>
             `;
@@ -822,8 +1008,8 @@ document.addEventListener('DOMContentLoaded', () => {
             
             try {
                 const [productosRes, categoriasRes] = await Promise.all([
-                    fetch(`${BASE_URL}/api/productos`),
-                    fetch(`${BASE_URL}/api/categorias`)
+                    fetch(`${API_BASE_URL}/productos`),
+                    fetch(`${API_BASE_URL}/categorias`)
                 ]);
                 if (!productosRes.ok || !categoriasRes.ok) throw new Error('No se pudo cargar la información inicial');
 
@@ -888,7 +1074,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Poblar un selector
     async function poblarSelectorFiltro(selectElement, endpoint, valueKey, textKey) {
         try {
-            const res = await fetch(`${BASE_URL}/api/${endpoint}`);
+            const res = await fetch(`${API_BASE_URL}/${endpoint}`);
             const data = await res.json();
             selectElement.innerHTML = `<option value="">Todos</option>`;
             data.forEach(item => {
@@ -910,7 +1096,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tablaConsultaVentasBody.innerHTML = '<tr><td colspan="6">Buscando...</td></tr>';
         
         try {
-            const res = await fetch(`${BASE_URL}/api/ventas/filtrar?${params.toString()}`);
+            const res = await fetch(`${API_BASE_URL}/ventas/filtrar?${params.toString()}`);
             const ventas = await res.json();
 
             tablaConsultaVentasBody.innerHTML = '';
@@ -997,38 +1183,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchAndRenderKPIs(mes) {
         // Poner textos de "cargando" para dar feedback al usuario
-        document.getElementById("kpi-total-invertido").textContent = "Cargando...";
-        document.getElementById("kpi-total-ventas").textContent = "Cargando...";
-        document.getElementById("kpi-categoria-estrella").textContent = "Cargando...";
-        document.getElementById("kpi-producto-rentable").textContent = "Cargando...";
-        document.getElementById("kpi-stock-critico-count").textContent = "Cargando...";
-        document.getElementById("kpi-stock-critico-lista").innerHTML = '';
+    document.getElementById("kpi-total-invertido").textContent = "Cargando...";
+    document.getElementById("kpi-total-ventas").textContent = "Cargando...";
+    document.getElementById("kpi-categoria-estrella").textContent = "Cargando...";
+    document.getElementById("kpi-producto-rentable").textContent = "Cargando...";
 
         try {
-            const res = await fetch(`${BASE_URL}/api/reportes/kpis?mes=${mes}`);
+            const res = await fetch(`${API_BASE_URL}/reportes/kpis?mes=${mes}`);
             if (!res.ok) throw new Error('Error al obtener los reportes');
             const data = await res.json();
 
             // Actualizar las tarjetas con los datos recibidos
-            document.getElementById("kpi-total-invertido").textContent = "$" + parseFloat(data.totalInvertido || 0).toFixed(2);
-            document.getElementById("kpi-total-ventas").textContent = "$" + parseFloat(data.totalVentas || 0).toFixed(2);
+            document.getElementById("kpi-total-invertido").textContent = "$" + Number(data.totalInvertido || 0).toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById("kpi-total-ventas").textContent = "$" + Number(data.totalVentas || 0).toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             document.getElementById("kpi-categoria-estrella").textContent = data.categoriaMasVendida || 'N/A';
             document.getElementById("kpi-producto-rentable").textContent = data.productoMayorMargen || 'N/A';
-            
-            const stockCriticoCountEl = document.getElementById("kpi-stock-critico-count");
-            const stockCriticoListaEl = document.getElementById("kpi-stock-critico-lista");
-
-            stockCriticoCountEl.textContent = data.stockCritico.count;
-
-            if (data.stockCritico.count > 0) {
-                data.stockCritico.productos.forEach(nombreProducto => {
-                    const li = document.createElement('li');
-                    li.textContent = nombreProducto;
-                    stockCriticoListaEl.appendChild(li);
-                });
-            } else {
-                stockCriticoListaEl.innerHTML = '<li>¡Sin productos críticos!</li>';
-            }
 
         } catch (err) {
             console.error("Error fetching KPIs:", err);
@@ -1056,7 +1225,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchAndRenderCharts(mes) {
         try {
-            const res = await fetch(`${BASE_URL}/api/reportes/graficas?mes=${mes}`);
+            const res = await fetch(`${API_BASE_URL}/reportes/graficas?mes=${mes}`);
             if (!res.ok) throw new Error('Error al obtener datos para las gráficas');
             const data = await res.json();
 
@@ -1168,14 +1337,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     chartControlButtons.forEach(button => {
         button.addEventListener('click', () => {
-            // Quitar la clase 'active' de todos los botones y contenedores
+            // Solo cambiamos el color de "activo", no ocultamos los demás
             chartControlButtons.forEach(btn => btn.classList.remove('active'));
-            chartWrappers.forEach(wrapper => wrapper.classList.remove('active'));
-
-            // Añadir la clase 'active' al botón presionado
             button.classList.add('active');
-            
-            // Mostrar el contenedor de la gráfica correspondiente
+
+            // Mostrar solo la gráfica correspondiente
+            chartWrappers.forEach(wrapper => wrapper.classList.remove('active'));
             const chartIdToShow = button.dataset.chart + '-wrapper';
             const wrapperToShow = document.getElementById(chartIdToShow);
             if (wrapperToShow) {
@@ -1183,6 +1350,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
 
 
     // Función para poblar una lista de análisis con formato detallado
@@ -1204,22 +1372,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // Función principal para buscar y mostrar el análisis
     async function fetchAndRenderAnalisis(mes) {
         try {
-            const res = await fetch(`${BASE_URL}/api/reportes/analisis-rapido?mes=${mes}`);
+            const res = await fetch(`${API_BASE_URL}/reportes/analisis-rapido?mes=${mes}`);
             if (!res.ok) throw new Error('No se pudo cargar el análisis rápido');
             const data = await res.json();
 
             // Usamos funciones 'formateador' para cada tipo de dato
-            poblarListaAnalisis('analisis-categorias-riesgo', data.categoriasEnRiesgo, 'Ninguna', item => 
-                `${item.categoria} <span class="detalle-analisis">(Venta: $${parseFloat(item.totalVentas).toFixed(2)} vs Inversión: $${parseFloat(item.totalInversion).toFixed(2)})</span>`
-            );
+            poblarListaAnalisis('analisis-categorias-riesgo', data.categoriasEnRiesgo, 'Ninguna', item => {
+                if (window.innerWidth <= 700) {
+                    return `${item.categoria} <span class="detalle-analisis">(V: $${Number(item.totalVentas).toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2})} < I: $${Number(item.totalInversion).toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2})})</span>`;
+                } else {
+                    return `${item.categoria} <span class="detalle-analisis">(Venta: $${Number(item.totalVentas).toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2})} vs Inversión: $${Number(item.totalInversion).toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2})})</span>`;
+                }
+            });
             poblarListaAnalisis('analisis-productos-bajos', data.productosBajasVentas, 'Ninguno', item => 
                 `${item.nombre_producto} <span class="detalle-analisis">(${item.numero_ventas} ventas)</span>`
             );
             poblarListaAnalisis('analisis-productos-top', data.productosTop, 'Sin datos', item => 
-                `${item.nombre_producto} <span class="detalle-analisis">($${parseFloat(item.totalVendido).toFixed(2)} vendidos)</span>`
+                `${item.nombre_producto} <span class="detalle-analisis">($${Number(item.totalVendido).toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2})} vendidos)</span>`
             );
             poblarListaAnalisis('analisis-clientes-adeudo', data.clientesConAdeudo, 'Ninguno', item => 
-                `${item.nombre} <span class="detalle-analisis">(Debe: $${parseFloat(item.saldo).toFixed(2)})</span>`
+                `${item.nombre} <span class="detalle-analisis">(Debe: $${Number(item.saldo).toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2})})</span>`
             );
 
         } catch (err) {
@@ -1236,7 +1408,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnRefreshReportes) {
         btnRefreshReportes.addEventListener('click', actualizarReportesCompletos);
     }
-
 
 
     // =================================================================
@@ -1258,7 +1429,7 @@ document.addEventListener('DOMContentLoaded', () => {
             formModifyCliente.reset(); // Limpiar formulario anterior
 
             try {
-                const res = await fetch(`${BASE_URL}/api/clientes`);
+                const res = await fetch(`${API_BASE_URL}/clientes`);
                 const clientes = await res.json();
                 selectModifyCliente.innerHTML = '<option value="">-- Selecciona un cliente --</option>';
                 clientes.forEach(cliente => {
@@ -1287,7 +1458,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             try {
                 // Pedir los datos completos del cliente seleccionado
-                const res = await fetch(`${BASE_URL}/api/clientes/${clienteId}`);
+                const res = await fetch(`${API_BASE_URL}/clientes/${clienteId}`);
                 const cliente = await res.json();
                 
                 // Llenar los campos del formulario con los datos
@@ -1319,7 +1490,7 @@ document.addEventListener('DOMContentLoaded', () => {
             delete data.cliente_id; // No necesitamos enviar el id en el cuerpo
 
             try {
-                const res = await fetch(`${BASE_URL}/api/clientes/modificar/${clienteId}`, {
+                const res = await fetch(`${API_BASE_URL}/clientes/modificar/${clienteId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
@@ -1338,134 +1509,98 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const closeBtns = modalModifyCliente.querySelectorAll(".close-modal");
-    closeBtns.forEach(btn => {
-        btn.addEventListener("click", () => {
-            modalModifyCliente.classList.add("hidden");
-            formModifyCliente.reset(); // opcional: limpia el formulario
-            camposModifyCliente.classList.add("hidden"); // oculta campos si estaba abierto
-        });
-    });
-
 
     // --- Modificar abono ---
-    const openModifyAbonoBtn = document.getElementById("openModifyAbono");
+    const openBtnModifyAbono = document.getElementById("openModifyAbono");
     const modalModifyAbono = document.getElementById("modalModificarAbono");
     const formModifyAbono = document.getElementById("formModificarAbono");
     const selectModifyAbono = document.getElementById("selectModificarAbono");
     const camposModifyAbono = document.getElementById("camposModificarAbono");
 
-    // En memoria: lista de abonos cargada (para no pedir /abonos/:id)
-    let _abonosCache = [];
+    // 1. Abrir el modal y cargar los abonos
+    if (openBtnModifyAbono) {
+        openBtnModifyAbono.addEventListener("click", async () => {
+            modalModifyAbono.classList.remove("hidden");
+            camposModifyAbono.classList.add('hidden'); // Ocultar campos
+            formModifyAbono.reset(); // Limpiar formulario
 
-    // --- Abrir modal: cargar abonos y mostrar modal ---
-    if (openModifyAbonoBtn) {
-    openModifyAbonoBtn.addEventListener("click", async () => {
-        // UI inicial
-        selectModifyAbono.innerHTML = '<option value="">-- Cargando abonos... --</option>';
-        camposModifyAbono.classList.add("hidden");
-        formModifyAbono.reset();
+            // Cargar abonos en el select
+            selectModifyAbono.innerHTML = '<option value="">-- Cargando abonos... --</option>';
+            try {
+                const res = await fetch(`${API_BASE_URL}/abonos`);
+                if (!res.ok) throw new Error('No se pudo cargar la lista de abonos');
+                const abonos = await res.json();
 
-        try {
-    const res = await fetch(`${BASE_URL}/api/abonos`);
-        if (!res.ok) throw new Error('Error al obtener abonos');
-        const abonos = await res.json();
-        _abonosCache = abonos; // guardar en cache
-
-        // Llenar select
-        selectModifyAbono.innerHTML = '<option value="">-- Selecciona un abono --</option>';
-        abonos.forEach(a => {
-            const opt = document.createElement("option");
-            opt.value = a.abono_id;
-            // formatea la etiqueta (fecha - cliente - monto)
-            const fecha = (a.fecha_abono || '').split('T')[0]; // si viene con time
-            opt.textContent = `${fecha} — ${a.cliente || 'Cliente'} — $${Number(a.monto_abono).toFixed(2)}`;
-            selectModifyAbono.appendChild(opt);
+                selectModifyAbono.innerHTML = '<option value="">-- Selecciona un abono --</option>';
+                abonos.forEach(abono => {
+                    const option = document.createElement("option");
+                    option.value = abono.abono_id;
+                    // Guardamos los datos del abono en el 'dataset' del option
+                    option.dataset.fecha = abono.fecha_abono.split('T')[0];
+                    option.dataset.monto = abono.monto_abono;
+                    option.textContent = `${abono.cliente} - $${abono.monto_abono} - ${new Date(abono.fecha_abono).toLocaleDateString()}`;
+                    selectModifyAbono.appendChild(option);
+                });
+            } catch (err) {
+                console.error(err);
+                selectModifyAbono.innerHTML = `<option value="">${err.message}</option>`;
+            }
         });
-
-        } catch (err) {
-        console.error('Error cargando abonos:', err);
-        selectModifyAbono.innerHTML = '<option value="">Error al cargar abonos</option>';
-        }
-
-        // mostrar modal
-        modalModifyAbono.classList.remove("hidden");
-        lucide.createIcons && lucide.createIcons();
-    });
     }
 
-    // --- Al cambiar selección: rellenar campos desde el cache ---
+    // 2. Cuando se selecciona un abono, mostrar sus datos
     if (selectModifyAbono) {
-    selectModifyAbono.addEventListener("change", (e) => {
-        const id = e.target.value;
-        if (!id) {
-        camposModifyAbono.classList.add("hidden");
-        return;
-        }
+        selectModifyAbono.addEventListener('change', (e) => {
+            const selectedOption = e.target.selectedOptions[0];
+            if (!selectedOption.value) {
+                camposModifyAbono.classList.add('hidden');
+                return;
+            }
+            
+            // Rellenar el formulario con los datos del 'dataset'
+            formModifyAbono.querySelector('input[name="fecha_abono"]').value = selectedOption.dataset.fecha;
+            formModifyAbono.querySelector('input[name="monto_abono"]').value = selectedOption.dataset.monto;
 
-        const abono = _abonosCache.find(x => String(x.abono_id) === String(id));
-        if (!abono) {
-        // fallback: esconder campos y avisar
-        camposModifyAbono.classList.add("hidden");
-        console.warn('Abono no encontrado en cache (id):', id);
-        return;
-        }
-
-        // rellenar fecha (yyyy-mm-dd) y monto
-        const fechaISO = (abono.fecha_abono || '').split('T')[0] || '';
-        formModifyAbono.querySelector('input[name="fecha_abono"]').value = fechaISO;
-        formModifyAbono.querySelector('input[name="monto_abono"]').value = Number(abono.monto_abono).toFixed(2);
-
-        camposModifyAbono.classList.remove("hidden");
-    });
-    }
-
-    // --- Submit: enviar PUT al backend ---
-    if (formModifyAbono) {
-    formModifyAbono.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const abonoId = selectModifyAbono.value;
-        if (!abonoId) {
-        alert("Primero debes seleccionar un abono.");
-        return;
-        }
-
-        const formData = new FormData(formModifyAbono);
-        const data = Object.fromEntries(formData.entries()); // { fecha_abono: '...', monto_abono: '...' }
-
-        try {
-        const res = await fetch(`${BASE_URL}/api/abonos/modificar/${abonoId}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
+            // Mostrar los campos del formulario
+            camposModifyAbono.classList.remove('hidden');
         });
-
-        const result = await res.json();
-        if (!res.ok) throw new Error(result.error || 'Error al modificar abono');
-
-        alert("✅ Abono actualizado con éxito.");
-        modalModifyAbono.classList.add("hidden");
-        formModifyAbono.reset();
-        camposModifyAbono.classList.add("hidden");
-
-        // refrescar resumen u otras vistas
-        if (typeof fetchSummary === 'function') fetchSummary();
-        } catch (err) {
-        console.error('Error al modificar abono:', err);
-        alert(`❌ Error: ${err.message}`);
-        }
-    });
     }
 
-    // --- Cerrar modal con botones "Cancelar" (class .close-modal) dentro del modal ---
-    modalModifyAbono.querySelectorAll(".close-modal").forEach(btn => {
-    btn.addEventListener("click", () => {
-        modalModifyAbono.classList.add("hidden");
-        formModifyAbono.reset();
-        camposModifyAbono.classList.add("hidden");
-    });
-    });
+    // 3. Al enviar el formulario, guardar los cambios
+    if (formModifyAbono) {
+        formModifyAbono.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const abonoId = selectModifyAbono.value;
+            if (!abonoId) {
+                alert("Por favor, selecciona un abono para modificar.");
+                return;
+            }
+
+            const formData = new FormData(formModifyAbono);
+            const data = {
+                fecha_abono: formData.get('fecha_abono'),
+                monto_abono: parseFloat(formData.get('monto_abono'))
+            };
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/abonos/modificar/${abonoId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await res.json();
+                if (!res.ok) throw new Error(result.error || 'Error desconocido del servidor');
+
+                alert('✅ Abono actualizado con éxito.');
+                modalModifyAbono.classList.add("hidden");
+                fetchSummary(); // Actualizar el resumen financiero
+                
+            } catch (err) {
+                alert(`❌ Error al modificar el abono: ${err.message}`);
+            }
+        });
+    }
 
 
 
@@ -1489,7 +1624,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cargar productos desde API
     async function cargarProductosModificar() {
         try {
-        const res = await fetch(`${BASE_URL}/api/productos`);
+        const res = await fetch("http://localhost:4000/api/productos");
         const productos = await res.json();
 
         selectModificarProducto.innerHTML = `<option value="">-- Seleccionar producto --</option>`;
@@ -1508,7 +1643,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cargar categorías desde API
     async function cargarCategoriasModificar() {
         try {
-        const res = await fetch(`${BASE_URL}/api/categorias`);
+        const res = await fetch("http://localhost:4000/api/categorias");
         const categorias = await res.json();
 
         selectCategoriaModificar.innerHTML = `<option value="">-- Seleccionar categoría --</option>`;
@@ -1552,7 +1687,7 @@ document.addEventListener('DOMContentLoaded', () => {
         data.unidades_disponibles = parseInt(data.unidades_disponibles);
 
         try {
-        const res = await fetch(`${BASE_URL}/api/productos/${data.producto_id}`, {
+        const res = await fetch(`http://localhost:4000/api/productos/${data.producto_id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
@@ -1600,7 +1735,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cargar ventas
     async function cargarVentas() {
         try {
-            const res = await fetch(`${BASE_URL}/api/ventas`);
+            const res = await fetch("http://localhost:4000/api/ventas");
             const ventas = await res.json();
 
             selectModificarVenta.innerHTML = `<option value="">-- Seleccionar venta --</option>`;
@@ -1627,13 +1762,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cargar productos
     async function cargarProductos() {
         try {
-            const res = await fetch(`${BASE_URL}/api/productos`);
+            const res = await fetch("http://localhost:4000/api/productos");
             const productos = await res.json();
 
             selectProductoModificarVenta.innerHTML = `<option value="">-- Seleccionar producto --</option>`;
             productos.forEach(p => {
                 const opt = document.createElement("option");
-                opt.value = p.nombre_producto;
+                // Corrección: Usar producto_id como el valor
+                opt.value = p.producto_id; 
                 opt.textContent = p.nombre_producto;
                 selectProductoModificarVenta.appendChild(opt);
             });
@@ -1645,7 +1781,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cargar clientes
     async function cargarClientes() {
         try {
-            const res = await fetch(`${BASE_URL}/api/clientes`);
+            const res = await fetch("http://localhost:4000/api/clientes");
             const clientes = await res.json();
 
             selectClienteModificarVenta.innerHTML = `<option value="">-- Seleccionar cliente --</option>`;
@@ -1663,7 +1799,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Mostrar campos al seleccionar venta
     selectModificarVenta.addEventListener("change", (e) => {
         const selectedOption = e.target.selectedOptions[0];
-        if (!selectedOption.value) {
+        if (!selectedOption || !selectedOption.value) {
             camposModificarVenta.classList.add("hidden");
             return;
         }
@@ -1671,14 +1807,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const venta = JSON.parse(selectedOption.dataset.venta);
         camposModificarVenta.classList.remove("hidden");
 
-        // Autorrellenar selects
-        selectProductoModificarVenta.value = venta.nombre_producto || "";
-        selectClienteModificarVenta.value = venta.cliente_id || "";
-
-        // Autorrellenar fecha
+        // Corrección: Asignar valores a los campos del formulario
+        formModificarVenta.producto_id.value = venta.producto_id || "";
+        formModificarVenta.cliente_id.value = venta.cliente_id || "";
         formModificarVenta.fecha_venta.value = venta.fecha_venta ? venta.fecha_venta.split('T')[0] : "";
-
-        // Autorrellenar cantidad y precio unitario
         formModificarVenta.cantidad.value = venta.cantidad || "";
         formModificarVenta.precio_unitario.value = venta.precio_unitario || "";
     });
@@ -1693,7 +1825,7 @@ document.addEventListener('DOMContentLoaded', () => {
         data.precio_unitario = parseFloat(data.precio_unitario);
 
         try {
-            const res = await fetch(`${BASE_URL}/api/ventas/${data.venta_id}`, {
+            const res = await fetch(`http://localhost:4000/api/ventas/${data.venta_id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data),
@@ -1712,17 +1844,173 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Error al modificar venta:", err);
             alert("❌ Error en el servidor");
         }
+    }); 
+    
+    
+    // --- Lógica para cerrar TODOS los modales con el botón de "Cancelar" ---
+    document.querySelectorAll('.close-modal').forEach(button => {
+        button.addEventListener('click', () => {
+            const modal = button.closest('.modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                const form = modal.querySelector('form');
+                if (form) {
+                    form.reset();
+                }
+                const campos = modal.querySelector('[id^="campos"]');
+                if (campos) {
+                    campos.classList.add('hidden');
+                }
+            }
+        });
     });
+
+
+
+
+
+
+    // FAB y menú móvil
+    const fabMenu = document.getElementById('fab-menu');
+    const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+    const mobileBottomSheet = document.getElementById('mobile-bottom-sheet');
+    const mobileNavBtns = document.querySelectorAll('.mobile-nav-btn');
+    const tabBtns = document.querySelectorAll('.tab-btn');
+
+    function openMobileMenu() {
+        mobileMenuOverlay.classList.remove('hidden');
+        mobileBottomSheet.classList.remove('hidden');
+        mobileBottomSheet.classList.add('active');
+    }
+    function closeMobileMenu() {
+        mobileMenuOverlay.classList.add('hidden');
+        mobileBottomSheet.classList.add('hidden');
+        mobileBottomSheet.classList.remove('active');
+    }
+    fabMenu.addEventListener('click', openMobileMenu);
+    mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+    mobileNavBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Cambia la pestaña activa
+            const tab = btn.getAttribute('data-tab');
+            tabBtns.forEach(t => {
+                t.classList.remove('active');
+                document.getElementById(t.dataset.tab).classList.remove('active');
+            });
+            document.querySelector('.tab-btn[data-tab="' + tab + '"]').classList.add('active');
+            document.getElementById(tab).classList.add('active');
+            // Cierra el menú móvil
+            closeMobileMenu();
+        });
+    });
+
+    // --- Lógica para Ocultar/Mostrar el FAB Automáticamente ---
+    const mainContainer = document.body; // El elemento a observar
+
+    // Esta función revisa si hay algún pop-up visible y oculta el botón del menú
+    const toggleFabVisibility = () => {
+        // Si la pantalla es más ancha que 700px (escritorio), SIEMPRE oculta el botón.
+        if (window.innerWidth > 700) {
+            fabMenu.style.display = 'none';
+            return;
+        }
+
+        // Si estamos en móvil, revisa si hay algún pop-up (modal) abierto.
+        const isModalOpen = document.querySelector('.modal:not(.hidden)');
+        
+        // Muestra el botón solo si estamos en móvil Y no hay pop-ups abiertos.
+        fabMenu.style.display = isModalOpen ? 'none' : 'flex';
+    };
+
+    // Creamos un "observador" que vigila los cambios en los pop-ups.
+    const observer = new MutationObserver(() => {
+        toggleFabVisibility();
+    });
+
+    // Le decimos al observador que vigile todos los pop-ups.
+    const modalsToObserve = document.querySelectorAll('.modal');
+    modalsToObserve.forEach(modal => {
+        observer.observe(modal, {
+            attributes: true,
+            attributeFilter: ['class']
+        });
+    });
+
+    // Añadimos un listener para re-evaluar si se cambia el tamaño de la ventana.
+    window.addEventListener('resize', toggleFabVisibility);
+
+    // Ejecutamos la función una vez al cargar la página para el estado inicial correcto.
+    toggleFabVisibility();
+
+
+
+
+
+    // --- LÓGICA PARA RETIRAR GANANCIAS ---
+    const btnRetirarGanancia = document.getElementById("btnRetirarGanancia");
+
+    if (btnRetirarGanancia) {
+        btnRetirarGanancia.addEventListener("click", async () => {
+            const gananciaElement = document.getElementById("totalGananciaPorDia");
+            const gananciaTexto = gananciaElement.textContent; // Formato: "$1,234.56"
+
+            // Convertir el texto a un número
+            const montoStr = gananciaTexto.replace(/[$,]/g, "");
+            const monto = parseFloat(montoStr);
+
+            if (isNaN(monto) || monto <= 0) {
+                alert("No hay ganancias disponibles para retirar.");
+                return;
+            }
+
+            const confirmar = confirm(`¿Estás seguro que deseas retirar la ganancia de $${monto.toFixed(2)}?`);
+
+            if (confirmar) {
+                try {
+                    const res = await fetch(`${API_BASE_URL}/retiros`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ monto: monto }),
+                    });
+
+                    const result = await res.json();
+
+                    if (!res.ok) {
+                        throw new Error(result.error || 'Ocurrió un error al registrar el retiro.');
+                    }
+
+                    alert(`✅ ${result.message}`);
+                    fetchSummary(); // Actualizar el resumen para reflejar el cambio
+
+                } catch (err) {
+                    console.error('Error al retirar ganancia:', err);
+                    alert(`❌ Error: ${err.message}`);
+                }
+            }
+        });
+    }
+
+
+     // --- LÓGICA PARA ACCIONES RÁPIDAS EN RESUMEN ---
+    const actionAddVentaBtn = document.getElementById("actionAddVenta");
+    const actionAddAbonoBtn = document.getElementById("actionAddAbono");
+    const agregarTab = document.querySelector('.tab-btn[data-tab="agregar"]');
+
+    if (actionAddVentaBtn) {
+        actionAddVentaBtn.addEventListener('click', () => {
+            if (agregarTab) agregarTab.click();
+            document.getElementById("openAddVenta").click();
+        });
+    }
+
+    if (actionAddAbonoBtn) {
+        actionAddAbonoBtn.addEventListener('click', () => {
+            if (agregarTab) agregarTab.click();
+            document.getElementById("openAddAbono").click();
+        });
+    }
 
 });
 
-
-/*
-    // --- Cerrar modal con botones "Cancelar" (class .close-modal) dentro del modal ---
-    modalModifyAbono.querySelectorAll(".close-modal").forEach(btn => {
-    btn.addEventListener("click", () => {
-        modalModifyAbono.classList.add("hidden");
-        formModifyAbono.reset();
-        camposModifyAbono.classList.add("hidden");
-    });
-*/
