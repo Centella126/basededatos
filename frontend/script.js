@@ -1,8 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- INICIALIZACIÓN GENERAL ---
     lucide.createIcons();
-    const API_BASE_URL = "http://localhost:4000/api";
 
+    // URL remota por defecto (ajusta si usas otra deployment)
+    // 📢 REEMPLAZA ESTA LÍNEA CON TU NUEVA URL DE RENDER
+    const REMOTE_BASE_URL = "https://salud-y-belleza-gema.onrender.com"; 
+
+    const IS_LOCALHOST = window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.168');
+    let BASE_URL = IS_LOCALHOST ? "http://localhost:4000" : REMOTE_BASE_URL;
+    
     // --- MANEJO DE PESTAÑAS ---
     const tabs = document.querySelectorAll(".tab-btn");
     const contents = document.querySelectorAll(".tab-content");
