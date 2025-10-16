@@ -2,6 +2,26 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 
+// GET /api/productos/barcode/:barcode
+// Devuelve un producto basado en su código de barras.
+router.get('/barcode/:barcode', async (req, res) => {
+  try {
+    const { barcode } = req.params;
+    const [productos] = await pool.query(
+      'SELECT * FROM productos WHERE codigo_barras = ?',
+      [barcode]
+    );
+    if (productos.length > 0) {
+      res.json({ success: true, producto: productos[0] });
+    } else {
+      res.json({ success: false, message: 'Producto no encontrado' });
+    }
+  } catch (err) {
+    console.error('Error al buscar producto por código de barras:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 // GET /api/productos
 // Devuelve una lista de todos los productos con su categoría para poblar el selector.
 router.get('/', async (req, res) => {

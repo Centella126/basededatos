@@ -48,11 +48,19 @@ router.post('/agregar', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const [ventas] = await pool.query(
-      `SELECT v.venta_id, v.cantidad, v.precio_unitario, p.nombre_producto, c.nombre AS cliente
-       FROM ventas v
-       JOIN productos p ON v.producto_id = p.producto_id
-       JOIN clientes c ON v.cliente_id = c.cliente_id
-       ORDER BY v.fecha_venta DESC`
+      `SELECT 
+        v.venta_id,
+        v.producto_id,      -- <--- LÍNEA AÑADIDA
+        v.cliente_id,       -- <--- LÍNEA AÑADIDA
+        v.cantidad,
+        v.precio_unitario,
+        v.fecha_venta,
+        p.nombre_producto,
+        c.nombre as cliente
+      FROM ventas v
+      JOIN productos p ON v.producto_id = p.producto_id
+      JOIN clientes c ON v.cliente_id = c.cliente_id
+      ORDER BY v.fecha_venta DESC`
     );
     res.json(ventas);
   } catch (err) {
@@ -95,30 +103,28 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// ****** NUEVA RUTA PARA OBTENER VENTAS POR CLIENTE ******
+// GET /api/ventas/cliente/:id
+// Devuelve el historial de ventas para un cliente específico.
 router.get('/cliente/:id', async (req, res) => {
+  try {
     const { id } = req.params;
-    try {
-        const [ventas] = await pool.query(
-          `SELECT 
-              v.venta_id,
-              v.producto_id,
-              v.cliente_id,
-              v.fecha_venta,
-              v.cantidad,
-              v.precio_unitario,
-              p.nombre_producto,
-              c.nombre AS cliente
-          FROM ventas v
-          JOIN productos p ON v.producto_id = p.producto_id
-          JOIN clientes c ON v.cliente_id = c.cliente_id
-          ORDER BY v.fecha_venta DESC`
-        );
-        res.json(ventas);
-    } catch (err) {
-        console.error('Error al obtener el historial de ventas del cliente:', err);
-        res.status(500).json({ error: 'Error interno del servidor.' });
-    }
+    const [ventas] = await pool.query(`
+      SELECT 
+        v.fecha_venta,
+        p.nombre_producto,
+        v.cantidad,
+        v.precio_unitario,
+        (v.cantidad * v.precio_unitario) AS subtotal
+      FROM ventas v
+      JOIN productos p ON v.producto_id = p.producto_id
+      WHERE v.cliente_id = ?  -- <<--- ESTA ES LA LÍNEA QUE LO ARREGLA
+      ORDER BY v.fecha_venta DESC
+    `, [id]); // <-- Y aquí se pasa el ID de forma segura
+    res.json(ventas);
+  } catch (err) {
+    console.error('Error al obtener historial de ventas del cliente:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
 });
 
 // ****** NUEVA RUTA PARA FILTRAR VENTAS ******

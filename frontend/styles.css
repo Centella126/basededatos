@@ -568,11 +568,31 @@ h1 {
   padding: 10px;
 }
 
+
 #whatsapp-client-list .client-item {
+  display: flex;                  /* Activa el modo Flexbox */
+  justify-content: space-between; /* ESTA ES LA REGLA CLAVE: empuja los elementos hijos a los extremos */
+  align-items: center;            /* Centra todo verticalmente */
+  width: 100%;
+  padding: 12px 5px;
+  border-bottom: 1px solid #f0f0f0;
+  box-sizing: border-box;
+}
+
+/* El nuevo contenedor para agrupar checkbox y nombre */
+#whatsapp-client-list .client-info-container {
   display: flex;
   align-items: center;
-  padding: 8px 4px;
-  border-bottom: 1px solid #f0f0f0;
+}
+
+/* La etiqueta del nombre (solo para darle un margen) */
+#whatsapp-client-list .client-item label {
+  margin-left: 10px;
+}
+
+/* El saldo (solo para darle estilo) */
+#whatsapp-client-list .client-item .saldo {
+  font-weight: bold;
 }
 
 #whatsapp-sender-table {
@@ -699,3 +719,21 @@ h1 {
     font-size: 13px;
   }
 }
+
+/* --- Ajuste para los botones de acción en los modales --- */
+
+.modal-actions {
+  display: flex; /* Activa el modelo de caja flexible */
+  flex-wrap: wrap; /* Permite que los botones pasen a la siguiente línea si no hay espacio */
+  justify-content: flex-end; /* Alinea los botones a la derecha */
+  gap: 10px; /* Añade un espacio entre los botones */
+  margin-top: 1.5rem; /* Da un poco de espacio superior */
+}
+
+/* Opcional: Asegura que los botones ocupen el espacio necesario */
+.modal-actions .option-btn {
+  flex-grow: 1; /* Permite que los botones crezcan para ocupar el espacio disponible */
+  flex-basis: 20px; /* Define un tamaño base mínimo para cada botón */
+  text-align: center;
+}
+

@@ -69,6 +69,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalVenta = document.getElementById("modalVenta");
 
     // --- LÓGICA MODAL PRODUCTOS ---
+    const nombreProductoSeleccionado = document.getElementById("nombreProductoSeleccionado");
+    const textoNombreProducto = document.getElementById("textoNombreProducto");
     const openBtnProducto = document.getElementById("openAddProduct");
     const closeBtnProducto = document.getElementById("closeModal");
     const formProducto = document.getElementById("formProducto");
@@ -127,23 +129,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     selectProducto.addEventListener('change', (e) => {
         const selectedValue = e.target.value;
+
+        // Limpiar campos y ocultar divs dinámicos
         formProducto.querySelector('input[name="precio_compra"]').value = '';
         formProducto.querySelector('input[name="codigo_barras"]').value = '';
+        camposNuevoProducto.classList.add('hidden');
+        nombreProductoSeleccionado.classList.add('hidden');
+
         if (selectedValue === 'nuevo') {
+            // Si es un producto nuevo, mostrar los campos para crearlo
             camposNuevoProducto.classList.remove('hidden');
             inputNombreNuevoProducto.required = true;
             selectCategoria.required = true;
         } else if (selectedValue) {
+            // Si es un producto existente, buscar sus datos
             camposNuevoProducto.classList.add('hidden');
             inputNombreNuevoProducto.required = false;
             selectCategoria.required = false;
             const producto = productosData.find(p => p.producto_id == selectedValue);
+
             if (producto) {
+                // Mostrar el nombre del producto
+                nombreProductoSeleccionado.classList.remove('hidden');
+                textoNombreProducto.textContent = producto.nombre_producto;
+
+                // Rellenar precio y código de barras
                 formProducto.querySelector('input[name="precio_compra"]').value = producto.precio_compra || '';
                 formProducto.querySelector('input[name="codigo_barras"]').value = producto.codigo_barras || '';
             }
-        } else {
-            camposNuevoProducto.classList.add('hidden');
         }
     });
 
@@ -252,8 +265,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     const saldoFormateado = Number(cliente.saldo_deudor).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
                     const itemHTML = `
                         <div class="client-item">
-                            <input type="checkbox" class="whatsapp-client-checkbox" value="${cliente.cliente_id}" data-cliente='${JSON.stringify(cliente)}'>
-                            <label>${cliente.nombre}</label>
+                            <div class="client-info-container">
+                                <input type="checkbox" class="whatsapp-client-checkbox" value="${cliente.cliente_id}" data-cliente='${JSON.stringify(cliente)}'>
+                                <label>${cliente.nombre}</label>
+                            </div>
                             <span class="saldo">${saldoFormateado}</span>
                         </div>
                     `;
@@ -460,11 +475,16 @@ document.addEventListener('DOMContentLoaded', () => {
             selectProductoAnidado.value = 'nuevo';
             selectProductoAnidado.dispatchEvent(new Event('change'));
             
-        } else {
-            // Esto se mantiene igual para cuando seleccionas un producto existente
-            const producto = selectProductoVenta.productosData?.find(p => p.producto_id == selectedId);
-            formVenta.querySelector('input[name="precio_unitario"]').value = producto ? (producto.precio_venta || '') : '';
-        }
+            } else {
+                // Esto se mantiene igual para cuando seleccionas un producto existente
+                const producto = selectProductoVenta.productosData?.find(p => p.producto_id == selectedId);
+
+                // --- INICIO DE LA MODIFICACIÓN ---
+                // Rellenar el precio de venta y el nuevo campo de precio de compra
+                formVenta.querySelector('input[name="precio_unitario"]').value = producto ? (producto.precio_venta || '') : '';
+                document.getElementById('precio_compra_venta').value = producto ? (producto.precio_compra || '') : '';
+                // --- FIN DE LA MODIFICACIÓN ---
+            }
     });
 
     selectClienteVenta.addEventListener('change', (e) => {
@@ -1233,8 +1253,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Variables para guardar las instancias de las gráficas y poder actualizarlas
-    let ventasChartInstance = null;
-    let inversionChartInstance = null;
     let ventasVsInversionChartInstance = null;
 
     async function fetchAndRenderCharts(mes) {
@@ -1247,66 +1265,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const labels = data.map(item => item.categoria); // Nombres de las categorías
             const ventasData = data.map(item => parseFloat(item.totalVentas || 0));
             const inversionData = data.map(item => parseFloat(item.totalInversion || 0));
-
-            // --- Gráfica 1: Ventas por Categoría ---
-            const ctxVentas = document.getElementById('ventasPorCategoriaChart').getContext('2d');
-            if (ventasChartInstance) {
-                ventasChartInstance.destroy(); // Destruir gráfica anterior si existe
-            }
-            ventasChartInstance = new Chart(ctxVentas, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Total de Ventas',
-                        data: ventasData,
-                        backgroundColor: 'rgba(52, 152, 219, 0.6)',
-                        borderColor: 'rgba(52, 152, 219, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) { return '$' + value; }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // --- Gráfica 2: Inversión por Categoría ---
-            const ctxInversion = document.getElementById('inversionPorCategoriaChart').getContext('2d');
-            if (inversionChartInstance) {
-                inversionChartInstance.destroy();
-            }
-            inversionChartInstance = new Chart(ctxInversion, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Inversión en Inventario',
-                        data: inversionData,
-                        backgroundColor: 'rgba(44, 62, 80, 0.6)',
-                        borderColor: 'rgba(44, 62, 80, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) { return '$' + value; }
-                            }
-                        }
-                    }
-                }
-            });
 
             // --- GRÁFICA 3: Ventas vs. Inversión ---
             const ctxVentasVsInversion = document.getElementById('ventasVsInversionChart').getContext('2d');
@@ -1344,27 +1302,6 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Error fetching chart data:", err);
         }
     }
-
-    // --- Lógica para los botones de las gráficas ---
-    const chartControlButtons = document.querySelectorAll('.chart-btn');
-    const chartWrappers = document.querySelectorAll('.chart-wrapper');
-
-    chartControlButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            // Solo cambiamos el color de "activo", no ocultamos los demás
-            chartControlButtons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-
-            // Mostrar solo la gráfica correspondiente
-            chartWrappers.forEach(wrapper => wrapper.classList.remove('active'));
-            const chartIdToShow = button.dataset.chart + '-wrapper';
-            const wrapperToShow = document.getElementById(chartIdToShow);
-            if (wrapperToShow) {
-                wrapperToShow.classList.add('active');
-            }
-        });
-    });
-
 
 
     // Función para poblar una lista de análisis con formato detallado
@@ -1760,7 +1697,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Guardamos solo los datos necesarios
                 opt.dataset.venta = JSON.stringify({
                     venta_id: v.venta_id,
-                    nombre_producto: v.nombre_producto,
+                    producto_id: v.producto_id, // <-- AÑADE ESTA LÍNEA
                     cliente_id: v.cliente_id,
                     fecha_venta: v.fecha_venta,
                     cantidad: v.cantidad,
@@ -1821,12 +1758,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const venta = JSON.parse(selectedOption.dataset.venta);
         camposModificarVenta.classList.remove("hidden");
 
-        // Corrección: Asignar valores a los campos del formulario
-        formModificarVenta.producto_id.value = venta.producto_id || "";
-        formModificarVenta.cliente_id.value = venta.cliente_id || "";
-        formModificarVenta.fecha_venta.value = venta.fecha_venta ? venta.fecha_venta.split('T')[0] : "";
-        formModificarVenta.cantidad.value = venta.cantidad || "";
-        formModificarVenta.precio_unitario.value = venta.precio_unitario || "";
+        // Asigna cada valor al campo correspondiente del formulario
+        formModificarVenta.querySelector('[name="producto_id"]').value = venta.producto_id || "";
+        formModificarVenta.querySelector('[name="cliente_id"]').value = venta.cliente_id || "";
+        formModificarVenta.querySelector('[name="fecha_venta"]').value = venta.fecha_venta ? venta.fecha_venta.split('T')[0] : "";
+        formModificarVenta.querySelector('[name="cantidad"]').value = venta.cantidad || "";
+        formModificarVenta.querySelector('[name="precio_unitario"]').value = venta.precio_unitario || "";
     });
 
     // Guardar cambios
@@ -2026,5 +1963,110 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-});
+    // --- LÓGICA DE ESCÁNER DE CÓDIGO DE BARRAS ---
+    let barcode = '';
+    let barcodeTimer;
 
+    document.addEventListener('keydown', (e) => {
+        // Ignorar si estamos dentro de un input, select o textarea
+        const activeElement = document.activeElement.tagName;
+        if (['INPUT', 'SELECT', 'TEXTAREA'].includes(activeElement)) {
+            return;
+        }
+
+        // Si se presiona Enter y hay un código, procesarlo
+        if (e.key === 'Enter' && barcode.length > 3) {
+            handleBarcode(barcode);
+            barcode = ''; // Resetear
+            return;
+        }
+
+        // Añadir el caracter al código (si es simple)
+        if (e.key.length === 1) {
+            barcode += e.key;
+        }
+
+        // Reiniciar el temporizador
+        clearTimeout(barcodeTimer);
+        barcodeTimer = setTimeout(() => {
+            barcode = ''; // Resetear si no hay actividad
+        }, 300); // 300ms de espera entre caracteres
+    });
+
+    async function handleBarcode(scannedCode) {
+        console.log(`Código de barras detectado: ${scannedCode}`);
+
+        try {
+            const res = await fetch(`${BASE_URL}/api/productos/barcode/${scannedCode}`);
+            
+            if (!res.ok) {
+                // Lanza un error si la respuesta del servidor no es exitosa (ej. 404)
+                throw new Error(`Error en la respuesta del servidor: ${res.status} ${res.statusText}`);
+            }
+
+            const data = await res.json();
+            const modal = document.getElementById('modalBarcodeAction');
+            modal.classList.remove('hidden');
+
+            // Guardar el código y los datos para usarlos después
+            modal.dataset.barcode = scannedCode;
+            modal.dataset.productData = JSON.stringify(data.producto || null);
+
+        } catch (err) {
+            console.error("Error detallado al verificar código de barras:", err);
+            alert('❌ Error al verificar el código de barras.');
+        }
+    }
+
+    // Event listener para el botón de Venta en el modal de acción
+    document.getElementById('barcodeActionVenta').addEventListener('click', () => {
+        const modal = document.getElementById('modalBarcodeAction');
+        const producto = JSON.parse(modal.dataset.productData);
+
+        modal.classList.add('hidden'); // Ocultar el modal de acción
+
+        if (producto) {
+            // Si el producto existe, abrir modal de venta y rellenar datos
+            openBtnVenta.click(); // Simular click para abrir el modal de venta
+            setTimeout(() => { // Esperar un poco a que el modal se cargue
+                selectProductoVenta.value = producto.producto_id;
+                formVenta.querySelector('input[name="precio_unitario"]').value = producto.precio_venta || '';
+            }, 100);
+        } else {
+            // Si el producto no existe, notificar al usuario
+            alert('⚠️ Producto no encontrado. Por favor, regístralo primero.');
+            openBtnProducto.click(); // Abrir modal para agregar producto
+            setTimeout(() => {
+                document.getElementById('selectProducto').value = 'nuevo';
+                document.getElementById('selectProducto').dispatchEvent(new Event('change'));
+                document.getElementById('inputCodigoBarras').value = modal.dataset.barcode;
+            }, 100);
+        }
+    });
+
+    // Event listener para el botón de Producto en el modal de acción
+    document.getElementById('barcodeActionProducto').addEventListener('click', () => {
+        const modal = document.getElementById('modalBarcodeAction');
+        const producto = JSON.parse(modal.dataset.productData);
+        const barcode = modal.dataset.barcode;
+
+        modal.classList.add('hidden');
+
+        openBtnProducto.click(); // Abrir modal de producto
+
+        setTimeout(() => {
+            if (producto) {
+                // Si el producto existe, rellenar sus datos para actualizar stock
+                selectProducto.value = producto.producto_id;
+                formProducto.querySelector('input[name="precio_compra"]').value = producto.precio_compra || '';
+                formProducto.querySelector('input[name="codigo_barras"]').value = producto.codigo_barras || '';
+            } else {
+                // Si no existe, preparar para nuevo producto
+                selectProducto.value = 'nuevo';
+                selectProducto.dispatchEvent(new Event('change'));
+                formProducto.querySelector('input[name="codigo_barras"]').value = barcode;
+            }
+        }, 200); // Dar tiempo a que se pueblen los dropdowns
+    });
+
+});

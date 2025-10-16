@@ -21,13 +21,10 @@
     <button class="tab-btn" data-tab="consultas">Consultas</button>
     <button class="tab-btn" data-tab="reportes">Reportes</button>
   </nav>
-  <!-- FAB para móvil -->
   <button id="fab-menu" class="fab-menu" aria-label="Abrir menú de navegación">
     <i data-lucide="menu"></i>
   </button>
-  <!-- Overlay para menú móvil -->
   <div id="mobile-menu-overlay" class="mobile-menu-overlay hidden"></div>
-  <!-- Bottom sheet menú móvil -->
   <div id="mobile-bottom-sheet" class="mobile-bottom-sheet hidden">
     <nav class="mobile-nav">
       <button class="mobile-nav-btn" data-tab="resumen"><i data-lucide="bar-chart-3"></i> Resumen</button>
@@ -127,7 +124,6 @@
       <div class="card kpi-full"><h2>Producto Más Rentable</h2><p class="value" id="kpi-producto-rentable"></div>
     </div>
 
-    <!-- Sección de Análisis Rápido -->
     <div class="card">
     <h2><i data-lucide="activity"></i> Análisis Rápido</h2>
     <div class="analisis-grid">
@@ -153,17 +149,9 @@
     <div class="card">
       <h2><i data-lucide="bar-chart-2"></i> Gráficas</h2>
       <div class="charts-controls">
-        <button class="chart-btn active" data-chart="ventasPorCategoriaChart">Ventas por Categoría</button>
-        <button class="chart-btn" data-chart="inversionPorCategoriaChart">Inversión por Categoría</button>
         <button class="chart-btn" data-chart="ventasVsInversionChart">Ventas vs. Inversión</button>
       </div>
-      <div class="chart-wrapper active" id="ventasPorCategoriaChart-wrapper">
-        <canvas id="ventasPorCategoriaChart"></canvas>
-      </div>
-      <div class="chart-wrapper" id="inversionPorCategoriaChart-wrapper">
-        <canvas id="inversionPorCategoriaChart"></canvas>
-      </div>
-      <div class="chart-wrapper" id="ventasVsInversionChart-wrapper">
+      <div class="chart-wrapper active" id="ventasVsInversionChart-wrapper">
         <canvas id="ventasVsInversionChart"></canvas>
       </div>
     </div>
@@ -331,6 +319,10 @@
       <form id="formProducto">
         <label>Producto:</label>
         <select name="producto_id" id="selectProducto" required></select>
+        <div id="nombreProductoSeleccionado" class="hidden" style="margin-top: 10px;">
+            <label>Nombre del Producto:</label>
+            <p id="textoNombreProducto" style="font-weight: bold; margin: 5px 0 0 0; padding: 8px; background-color: #f0f0f0; border-radius: 4px;"></p>
+        </div>
         <div id="camposNuevoProducto" class="hidden">
           <label>Nombre del Nuevo Producto:</label>
           <input type="text" name="nombre_producto" />
@@ -341,7 +333,7 @@
             <input type="text" name="nombre_categoria" />
           </div>
         </div>
-        <label>Código de Barras (Opcional):</label>
+        <label>Código de Barras:</label>
         <input type="text" name="codigo_barras" id="inputCodigoBarras" />
         <label>Precio de Compra:</label>
         <input type="number" name="precio_compra" step="0.01" required />
@@ -397,6 +389,8 @@
       <form id="formVenta">
         <label>Producto:</label>
         <select name="producto_id" id="selectProductoVenta" required></select>
+        <label>Precio de Compra (Referencia):</label>
+        <input type="number" id="precio_compra_venta" step="0.01" readonly style="background-color: #f0f0f0;"/>
         <label>Precio de Venta (Unitario):</label>
         <input type="number" name="precio_unitario" step="0.01" required />
         <label>Cantidad a Vender:</label>
@@ -479,7 +473,6 @@
     </div>
   </div>
 
-  <!-- Modal Modificar cliente -->
   <div id="modalModificarCliente" class="modal hidden">
     <div class="modal-content">
         <h2>Modificar Cliente</h2>
@@ -503,7 +496,6 @@
     </div>
   </div>
 
-  <!-- Modal Modificar abono -->
   <div id="modalModificarAbono" class="modal hidden">
     <div class="modal-content">
         <h2>Modificar Abono</h2>
@@ -530,7 +522,6 @@
     </div>
   </div>
 
-  <!-- Modal Modificar Producto -->
   <div id="modalModificarProducto" class="modal hidden">
     <div class="modal-content">
       <h2>Modificar Producto</h2>
@@ -563,7 +554,6 @@
     </div>
   </div>
 
-  <!-- Modal Modificar Venta -->
   <div id="modalModificarVenta" class="modal hidden">
     <div class="modal-content">
       <h2>Modificar Venta</h2>
@@ -587,7 +577,6 @@
           <label>Precio Unitario:</label>
           <input type="number" step="0.01" name="precio_unitario" id="precioModificarVenta" required />
 
-          <!-- Campo de solo lectura para mostrar el subtotal -->
           <label>Subtotal:</label>
           <input type="number" step="0.01" name="subtotal" id="subtotalModificarVenta" readonly />
         </div>
@@ -604,8 +593,18 @@
     </div>
   </div>
 
+  <div id="modalBarcodeAction" class="modal hidden">
+    <div class="modal-content">
+      <h2>Código de Barras Detectado</h2>
+      <p>¿Qué deseas hacer con este producto?</p>
+      <div class="modal-actions" style="justify-content: center;">
+        <button type="button" id="barcodeActionVenta" class="option-btn"><i data-lucide="shopping-cart"></i> Registrar Venta</button>
+        <button type="button" id="barcodeActionProducto" class="option-btn"><i data-lucide="package-plus"></i> Registrar/Actualizar Producto</button>
+        <button type="button" class="close-modal option-btn danger"><i data-lucide="x"></i> Cancelar</button>
+      </div>
+    </div>
+  </div>
 
-  <!-- Modal WhatsApp -->
   <div id="modalWhatsappSelection" class="modal hidden">
     <div class="modal-content" style="width: 500px; max-width: 95%;">
       <h2>Seleccionar Clientes para Enviar Saldo</h2>
