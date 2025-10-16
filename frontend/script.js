@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // URL remota por defecto (ajusta si usas otra deployment)
     // 📢 REEMPLAZA ESTA LÍNEA CON TU NUEVA URL DE RENDER
+    // Intento de commit
     const REMOTE_BASE_URL = "https://salud-y-belleza-gema.onrender.com"; 
 
     const IS_LOCALHOST = window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.168');
