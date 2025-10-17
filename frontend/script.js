@@ -4,17 +4,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     //---------------------------------------------------------------------------
     // P A R A     U S A R     O N L I N E
-    //const REMOTE_BASE_URL = "https://salud-y-belleza-gema.onrender.com"; 
-    //const IS_LOCALHOST = window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.168');
-    //let BASE_URL = IS_LOCALHOST ? "http://localhost:4000" : REMOTE_BASE_URL;
+    const REMOTE_BASE_URL = "https://salud-y-belleza-gema.onrender.com"; 
+    const IS_LOCALHOST = window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.168');
+    let BASE_URL = IS_LOCALHOST ? "http://localhost:4000" : REMOTE_BASE_URL;
     // ---------------------------------------------------------------------------
 
     // --------------------------------------------------------------------------
     // P A R A     U S A R     L O C A L
-    let BASE_URL = "http://localhost:4000";
-    if (BASE_URL.endsWith('/')) {
-    BASE_URL = BASE_URL.slice(0, -1);
-    }
+    //let BASE_URL = "http://localhost:4000";
+    //if (BASE_URL.endsWith('/')) {
+    //BASE_URL = BASE_URL.slice(0, -1);
+    //}
     // ---------------------------------------------------------------------------
 
     // --- MANEJO DE PESTAÑAS ---
@@ -114,6 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) { console.error('Error al cargar categorías:', err); }
     }
 
+    
     openBtnProducto.addEventListener("click", () => {
         formProducto.reset();
         camposNuevoProducto.classList.add('hidden');
@@ -1828,6 +1829,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileNavBtns = document.querySelectorAll('.mobile-nav-btn');
     const tabBtns = document.querySelectorAll('.tab-btn');
 
+    // --- SOLUCIÓN 1: Ocultar botón "Resumen" con JavaScript ---
+    // Esto se ejecuta al cargar la página y oculta el botón a la fuerza.
+    const resumenMobileBtn = document.querySelector('.mobile-nav-btn[data-tab="resumen"]');
+    if (resumenMobileBtn) {
+        resumenMobileBtn.style.display = 'none';
+    }
+    // --- FIN SOLUCIÓN 1 ---
+
     function openMobileMenu() {
         mobileMenuOverlay.classList.remove('hidden');
         mobileBottomSheet.classList.remove('hidden');
@@ -1838,29 +1847,77 @@ document.addEventListener('DOMContentLoaded', () => {
         mobileBottomSheet.classList.add('hidden');
         mobileBottomSheet.classList.remove('active');
     }
-    fabMenu.addEventListener('click', openMobileMenu);
+
+    // --- LÓGICA MEJORADA PARA EL BOTÓN FLOTANTE (CLIC vs. DEJAR APRETADO) ---
+    let pressTimer;
+    let isLongPress = false;
+
+    fabMenu.addEventListener('mousedown', startPress);
+    fabMenu.addEventListener('touchstart', startPress, { passive: true });
+
+    fabMenu.addEventListener('mouseup', endPress);
+    fabMenu.addEventListener('mouseleave', endPress);
+    fabMenu.addEventListener('touchend', endPress);
+
+    fabMenu.addEventListener('click', handleClick);
+
+    function startPress() {
+        isLongPress = false;
+        pressTimer = window.setTimeout(() => {
+            isLongPress = true;
+            // Si el menú ya está abierto, no hacemos nada con la pulsación larga
+            if (mobileBottomSheet.classList.contains('hidden')) {
+                openMobileMenu(); // <-- ACCIÓN: Dejar apretado (abre el menú)
+            }
+        }, 400); 
+    }
+
+    function endPress() {
+        clearTimeout(pressTimer);
+    }
+
+    function handleClick(e) {
+        if (isLongPress) {
+            e.preventDefault();
+            return;
+        }
+
+        // --- SOLUCIÓN 2: Nueva lógica de clic ---
+        // 1. Revisa si el menú de pestañas está abierto
+        if (!mobileBottomSheet.classList.contains('hidden')) {
+            closeMobileMenu(); // Si está abierto, lo cierra
+        } else {
+            // Si no está abierto, cierra cualquier otro pop-up
+            document.querySelectorAll('.modal:not(.hidden)').forEach(modal => {
+                modal.classList.add('hidden');
+            });
+        }
+
+        // 2. Siempre va a la pestaña de resumen
+        const resumenTabBtn = document.querySelector('.tab-btn[data-tab="resumen"]');
+        if (resumenTabBtn) {
+            resumenTabBtn.click();
+        }
+        // --- FIN SOLUCIÓN 2 ---
+    }
+    
     mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+    
     mobileNavBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             const tabId = btn.getAttribute('data-tab');
-
-            // 1. Oculta TODOS los contenidos, incluidas las vistas de consulta
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
             });
-            
-            // 2. Desactiva todos los botones de la barra de pestañas principal
             tabBtns.forEach(t => t.classList.remove('active'));
-
-            // 3. Activa la pestaña y el contenido que sí queremos ver
             document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
             document.getElementById(tabId).classList.add('active');
-            
-            // 4. Cierra el menú móvil
             closeMobileMenu();
         });
     });
 
+
+    
     // --- Lógica para Ocultar/Mostrar el FAB Automáticamente ---
     const mainContainer = document.body; // El elemento a observar
 

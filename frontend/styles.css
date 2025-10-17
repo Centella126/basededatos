@@ -455,8 +455,12 @@ h1 {
   display: block;
 }
 
+
+
+/* --- MENÚ MÓVIL Y BOTÓN FLOTANTE --- */
+/* El botón flotante redondo (sin cambios) */
 .fab-menu {
-  display: none; /* Oculto por defecto en escritorio */
+  display: none;
   position: fixed;
   bottom: 20px;
   left: 50%;
@@ -480,13 +484,14 @@ h1 {
   background: var(--c3);
 }
 
+/* El fondo oscuro que cubre la pantalla */
 .mobile-menu-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.4); /* Ligeramente más transparente */
   z-index: 40;
   opacity: 1;
   transition: opacity 0.3s ease-in-out;
@@ -497,55 +502,84 @@ h1 {
   pointer-events: none;
 }
 
+/* La nueva barra de menú lateral */
 .mobile-bottom-sheet {
   position: fixed;
-  bottom: 0;
-  width: 100vw;
-  background: #fff;
-  border-radius: 18px 18px 0 0;
-  box-shadow: 0 -4px 24px rgba(0,0,0,0.18);
+  top: 50%; /* Se posiciona en la mitad vertical de la pantalla */
+  right: 0; /* Anclado a la derecha */
+  width: 75px; /* Ancho fijo para la barra de iconos */
+  height: auto; /* La altura se ajusta al contenido */
+  background: #ffffff;
+  box-shadow: -4px 0px 20px rgba(0,0,0,0.12); /* Sombra a la izquierda */
+  border-radius: 20px 0 0 20px; /* Bordes redondeados a la izquierda */
   z-index: 50;
-  transform: translateY(100%);
-  transition: transform 0.35s cubic-bezier(.4,1.4,.6,1);
-  padding: 24px 0 16px 0;
-  max-width: 480px;
-  margin: 0 auto;
-  left: 50%;
-  transform: translate(-50%, 100%);
+  padding: 15px 0; /* Espacio vertical interior */
+  
+  /* Animación: empieza oculto a la derecha y centrado verticalmente */
+  transform: translate(100%, -50%);
+  transition: transform 0.35s ease-out;
 }
 
+/* Estado activo: el menú se desliza a su posición visible */
 .mobile-bottom-sheet.active {
-  transform: translate(-50%, 0);
+  transform: translate(0, -50%);
 }
 
+/* La lista de botones dentro del menú */
 .mobile-nav {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  align-items: center;
+  gap: 15px; /* Espacio entre cada botón */
+  width: 100%;
+  align-items: center; /* Centra los botones horizontalmente */
 }
 
+/* Los botones de icono individuales */
 .mobile-nav-btn {
-  width: 90%;
-  padding: 16px;
-  font-size: 18px;
+  width: 50px; /* Ancho del botón */
+  height: 50px; /* Alto del botón para hacerlo cuadrado */
+  padding: 0; /* Quitamos el padding para controlar el tamaño exacto */
+  font-size: 0; /* TRUCO: Oculta el texto del botón */
   border: none;
-  border-radius: 10px;
-  background: var(--c2);
-  color: #333;
-  font-weight: 600;
+  border-radius: 12px; /* Bordes redondeados */
+  background: transparent;
+  color: var(--dark-gray); /* Color del ícono por defecto */
   display: flex;
   align-items: center;
-  gap: 12px;
-  justify-content: flex-start;
+  justify-content: center; /* Centra el ícono perfectamente */
   cursor: pointer;
+  transition: all 0.2s ease-in-out;
 }
 
-.mobile-nav-btn:active,
+/* Da tamaño al ícono SVG, ya que el texto está oculto */
+.mobile-nav-btn svg {
+    width: 26px;
+    height: 26px;
+}
+
+/* Efecto al pasar el cursor o tocar */
+.mobile-nav-btn:hover {
+  background-color: #f0f0f0; /* Un fondo gris claro */
+}
+
+/* Estilo del botón activo (pestaña actual) */
 .mobile-nav-btn.active {
   background: var(--c4);
   color: #fff;
+  transform: scale(1.1); /* Efecto de zoom para destacar */
 }
+
+/* Regla para ocultar el botón "Resumen" (sin cambios) */
+@media (max-width: 700px) {
+  #mobile-bottom-sheet .mobile-nav-btn[data-tab="resumen"] {
+    display: none !important;
+  }
+}
+/* --- Aqui se acaba el diseno del menu y el boton flotante --- */
+
+
+
+
 
 .value-with-action {
   display: flex;
@@ -770,7 +804,7 @@ h1 {
 
 #logout-btn {
     position: absolute;
-    top: 24px;
+    top: 20px;
     right: 24px;
 }
 @media (max-width: 700px) {
@@ -781,3 +815,4 @@ h1 {
     }
     #logout-btn .logout-text { display: none; }
 }
+
