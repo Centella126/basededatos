@@ -325,7 +325,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const totalAbonado = Number(cliente.total_abonado || 0).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
             const saldoDeudor = Number(cliente.saldo_deudor).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
             
-            const mensaje = `Hola ${cliente.nombre}, te saludamos de ${nombreNegocio}. Te escribimos para informarte sobre el estado de tu cuenta. Hasta la fecha, has abonado un total de ${totalAbonado} y tienes un saldo pendiente de ${saldoDeudor}. ¡Gracias!`;
+const mensaje = `¡Hola ${cliente.nombre}! 
+Te escribimos para informarte sobre el estado de tu cuenta hasta la fecha:
+Abonos: ${totalAbonado}
+Dinero pendiente: ${saldoDeudor}
+¡Gracias!
+
+Atentamente, Salud y Belleza Gema`;
             
             // Asegurarse de que el número esté en formato internacional (ej. 52 para México)
             const telefonoInternacional = `521${cliente.telefono.replace(/\s+/g, '')}`;
