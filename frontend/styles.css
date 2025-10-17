@@ -737,3 +737,33 @@ h1 {
   text-align: center;
 }
 
+/* --- ESTILOS COMPACTOS SOLO PARA EL MODAL DE VENTA EN MÓVIL --- */
+
+/* Se aplica solo cuando el ancho de la pantalla es de 600px o menos */
+@media (max-width: 600px) {
+  
+  /* Reduce el espacio entre cada campo del formulario de venta */
+  #modalVenta form {
+    gap: 8px; 
+  }
+
+  /* Hace más pequeñas las etiquetas de texto */
+  #modalVenta label {
+    font-size: 0.85rem;
+    margin-bottom: -5px; /* Reduce el espacio debajo de la etiqueta */
+  }
+  
+  /* Hace más bajos los campos de texto y selectores */
+  #modalVenta input,
+  #modalVenta select {
+    padding: 8px;
+    font-size: 0.95rem;
+  }
+}
+
+
+@media (max-width: 700px) {
+  #reportes {
+    padding-bottom: 100px; /* Añade un espacio considerable al final de la pestaña */
+  }
+}

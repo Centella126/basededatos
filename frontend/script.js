@@ -1842,15 +1842,21 @@ document.addEventListener('DOMContentLoaded', () => {
     mobileMenuOverlay.addEventListener('click', closeMobileMenu);
     mobileNavBtns.forEach(btn => {
         btn.addEventListener('click', function() {
-            // Cambia la pestaña activa
-            const tab = btn.getAttribute('data-tab');
-            tabBtns.forEach(t => {
-                t.classList.remove('active');
-                document.getElementById(t.dataset.tab).classList.remove('active');
+            const tabId = btn.getAttribute('data-tab');
+
+            // 1. Oculta TODOS los contenidos, incluidas las vistas de consulta
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
             });
-            document.querySelector('.tab-btn[data-tab="' + tab + '"]').classList.add('active');
-            document.getElementById(tab).classList.add('active');
-            // Cierra el menú móvil
+            
+            // 2. Desactiva todos los botones de la barra de pestañas principal
+            tabBtns.forEach(t => t.classList.remove('active'));
+
+            // 3. Activa la pestaña y el contenido que sí queremos ver
+            document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+            
+            // 4. Cierra el menú móvil
             closeMobileMenu();
         });
     });
