@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- LÓGICA PARA DETECTAR LA URL DEL SERVIDOR ---
+    // --- LÓGICA PARA DETECTAR LA URL DEL SERVIDOR (ONLINE O LOCAL) ---
     const REMOTE_BASE_URL = "https://salud-y-belleza-gema.onrender.com";
     const IS_LOCALHOST = window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.168');
     const BASE_URL = IS_LOCALHOST ? "http://localhost:4000" : REMOTE_BASE_URL;
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            // Usamos la variable BASE_URL para la dirección correcta
+            // Se usa la variable BASE_URL para apuntar al servidor correcto
             const res = await fetch(`${BASE_URL}/api/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
