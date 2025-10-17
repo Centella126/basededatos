@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <div class="login-container">
+        <form id="pin-form">
+            <h2>Ingresar PIN</h2>
+            <div class="pin-inputs">
+                <input type="password" inputmode="numeric" maxlength="1" class="pin-input" required>
+                <input type="password" inputmode="numeric" maxlength="1" class="pin-input" required>
+                <input type="password" inputmode="numeric" maxlength="1" class="pin-input" required>
+                <input type="password" inputmode="numeric" maxlength="1" class="pin-input" required>
+            </div>
+            <p id="error-message" class="error-message hidden">PIN incorrecto. Intenta de nuevo.</p>
+            <button type="submit" class="submit-btn">Ingresar</button>
+        </form>
+    </div>
+    <script src="login.js"></script>
+</body>
+</html>

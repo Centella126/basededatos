@@ -11,6 +11,7 @@ const abonosRoute = require('./routes/abonos');
 const ventasRoute = require('./routes/ventas'); 
 const reportesRoute = require('./routes/reportes'); 
 const retirosRouter = require('./routes/retiros');
+const loginRoute = require('./routes/login');
 
 const app = express();
 app.use(cors());
@@ -24,6 +25,7 @@ app.use('/api/abonos', abonosRoute);
 app.use('/api/ventas', ventasRoute); 
 app.use('/api/reportes', reportesRoute); 
 app.use('/api/retiros', retirosRouter);
+app.use('/api/login', loginRoute);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));

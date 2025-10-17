@@ -1,0 +1,73 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: Inter, system-ui, Arial;
+    background-color: #FFECC0;
+}
+
+.login-container {
+    text-align: center;
+    background-color: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px
+ 10px rgba(0,0,0,0.1);
+}
+
+h2 {
+    margin-top: 0;
+    color: #B95E82;
+}
+
+.pin-inputs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.pin-input {
+    width: 50px;
+    height: 60px;
+    font-size: 2rem;
+    text-align: center;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.pin-input:focus {
+    border-color: #B95E82;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #B95E82;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.submit-btn:hover {
+    background: #a15070;
+}
+
+.error-message {
+    color: #e74c3c;
+    margin-top: 15px;
+    font-size: 0.9rem;
+    height: 1em;
+}
+
+.hidden {
+    visibility: hidden;
+}

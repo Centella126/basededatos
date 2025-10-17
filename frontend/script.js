@@ -2092,4 +2092,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- LÓGICA DE LOGOUT ---
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            sessionStorage.removeItem('isAuthenticated');
+            window.location.href = 'login.html';
+        });
+    }
+
 });
