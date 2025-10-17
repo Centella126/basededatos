@@ -2025,24 +2025,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Event listener para el botón de Venta en el modal de acción
-    document.getElementById('barcodeActionVenta').addEventListener('click', () => {
+    document.getElementById('barcodeActionVenta').addEventListener('click', async () => {
         const modal = document.getElementById('modalBarcodeAction');
         const producto = JSON.parse(modal.dataset.productData);
-
         modal.classList.add('hidden'); // Ocultar el modal de acción
 
         if (producto) {
             // Si el producto existe, abrir modal de venta y rellenar datos
-            openBtnVenta.click(); // Simular click para abrir el modal de venta
-            setTimeout(() => { // Esperar un poco a que el modal se cargue
-                selectProductoVenta.value = producto.producto_id;
-                formVenta.querySelector('input[name="precio_unitario"]').value = producto.precio_venta || '';
-            }, 100);
+            
+            // 1. Asegurarnos de que las listas estén cargadas ANTES de continuar
+            await populateProductsDropdownVenta();
+            await populateClientsDropdown(selectClienteVenta);
+
+            // 2. Abrir el modal
+            formVenta.reset();
+            formVenta.querySelector('input[name="fecha_venta"]').value = new Date().toISOString().split('T')[0];
+            modalVenta.classList.remove("hidden");
+
+            // 3. Ahora sí, rellenar los datos con la certeza de que las listas existen
+            selectProductoVenta.value = producto.producto_id;
+            formVenta.querySelector('input[name="precio_unitario"]').value = producto.precio_venta || '';
+            document.getElementById('precio_compra_venta').value = producto.precio_compra || ''; // Rellenamos precio de compra también
+
         } else {
             // Si el producto no existe, notificar al usuario
             alert('⚠️ Producto no encontrado. Por favor, regístralo primero.');
-            openBtnProducto.click(); // Abrir modal para agregar producto
-            setTimeout(() => {
+            
+            // Abrimos el modal de agregar producto y rellenamos el código
+            openBtnProducto.click(); 
+            setTimeout(() => { // Un pequeño timeout aquí es aceptable porque no depende de datos asíncronos
                 document.getElementById('selectProducto').value = 'nuevo';
                 document.getElementById('selectProducto').dispatchEvent(new Event('change'));
                 document.getElementById('inputCodigoBarras').value = modal.dataset.barcode;
@@ -2051,28 +2062,34 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Event listener para el botón de Producto en el modal de acción
-    document.getElementById('barcodeActionProducto').addEventListener('click', () => {
+    document.getElementById('barcodeActionProducto').addEventListener('click', async () => {
         const modal = document.getElementById('modalBarcodeAction');
         const producto = JSON.parse(modal.dataset.productData);
         const barcode = modal.dataset.barcode;
-
         modal.classList.add('hidden');
 
-        openBtnProducto.click(); // Abrir modal de producto
+        // 1. Asegurarnos de que las listas estén cargadas ANTES de continuar
+        await populateProductsDropdown();
+        await populateCategoriesDropdown();
 
-        setTimeout(() => {
-            if (producto) {
-                // Si el producto existe, rellenar sus datos para actualizar stock
-                selectProducto.value = producto.producto_id;
-                formProducto.querySelector('input[name="precio_compra"]').value = producto.precio_compra || '';
-                formProducto.querySelector('input[name="codigo_barras"]').value = producto.codigo_barras || '';
-            } else {
-                // Si no existe, preparar para nuevo producto
-                selectProducto.value = 'nuevo';
-                selectProducto.dispatchEvent(new Event('change'));
-                formProducto.querySelector('input[name="codigo_barras"]').value = barcode;
-            }
-        }, 200); // Dar tiempo a que se pueblen los dropdowns
+        // 2. Abrir el modal
+        formProducto.reset();
+        camposNuevoProducto.classList.add('hidden');
+        campoNuevaCategoria.classList.add('hidden');
+        modalProducto.classList.remove("hidden");
+
+        // 3. Ahora rellenamos los datos
+        if (producto) {
+            // Si el producto existe, rellenar sus datos para actualizar stock
+            selectProducto.value = producto.producto_id;
+            // Disparamos el evento 'change' para que se ejecute la lógica asociada (como mostrar el nombre)
+            selectProducto.dispatchEvent(new Event('change')); 
+        } else {
+            // Si no existe, preparar para nuevo producto
+            selectProducto.value = 'nuevo';
+            selectProducto.dispatchEvent(new Event('change'));
+            formProducto.querySelector('input[name="codigo_barras"]').value = barcode;
+        }
     });
 
 });
