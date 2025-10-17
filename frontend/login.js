@@ -1,4 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // --- LÓGICA PARA DETECTAR LA URL DEL SERVIDOR ---
+    const REMOTE_BASE_URL = "https://salud-y-belleza-gema.onrender.com";
+    const IS_LOCALHOST = window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.168');
+    const BASE_URL = IS_LOCALHOST ? "http://localhost:4000" : REMOTE_BASE_URL;
+    // --- FIN DE LA LÓGICA DE URL ---
+
     const form = document.getElementById('pin-form');
     const inputs = document.querySelectorAll('.pin-input');
     const errorMessage = document.getElementById('error-message');
@@ -31,7 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const res = await fetch('http://localhost:4000/api/login', {
+            // Usamos la variable BASE_URL para la dirección correcta
+            const res = await fetch(`${BASE_URL}/api/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ pin })
