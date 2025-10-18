@@ -2164,4 +2164,20 @@ Atentamente, Salud y Belleza Gema`;
         });
     }
 
+
+
+    // --- REGISTRO DEL SERVICE WORKER ---
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js') // Asegúrate que la ruta sea correcta
+          .then(registration => {
+            console.log('Service Worker registrado con éxito:', registration.scope);
+          })
+          .catch(error => {
+            console.log('Error al registrar el Service Worker:', error);
+          });
+      });
+    }
+
+
 });

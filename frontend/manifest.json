@@ -1,0 +1,22 @@
+{
+  "name": "Salud y Belleza Gema", 
+  "short_name": "Finanzas Gema",                 
+  "description": "Dashboard financiero para gestión de ventas y clientes.", 
+  "start_url": "/index.html",             
+  "display": "standalone",                
+  "background_color": "#FFECC0",          
+  "theme_color": "#B95E82",               
+  "orientation": "portrait-primary",      
+  "icons": [
+    {
+      "src": "icono.png",             
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icono.png",             
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
